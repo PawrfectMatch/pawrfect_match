@@ -38,5 +38,21 @@ const createPet = async(req,res) =>{
 }
 
 
+const updatePet = async(req,res) =>{
+    const {id} = req.params
+    const updatedData = req.body
 
-module.exports = {getAllPets, getPetById, createPet}
+    try{
+        const updatedPet = await Pet.findByIdAndUpdate(id,updatedData, {new:true})
+        if(!updatedPet){
+            res.status(404).json({message:"Pet not found"})
+        }
+        res.status(200).json(updatedPet)
+    }catch(error){
+        res.status(500).json({message:"Error updating pet",error})
+    }
+}
+
+
+
+module.exports = {getAllPets, getPetById, createPet, updatePet}
