@@ -15,8 +15,8 @@ app.use(express.json());
 
 
 //Routes
-app.use("/api/users", usersRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 app.use('/api/pets', petRoutes)
 
 app.use("/", (req, res) => {
