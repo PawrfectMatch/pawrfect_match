@@ -3,10 +3,13 @@ const app = express();
 require('dotenv').config(); 
 const db = require("./config/db")
 const cors = require("cors");
+const petRoutes = require('./routes/petRoutes')
 
 //Middleware
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/pets', petRoutes)
 
 
 app.use("/", (req, res) => {
