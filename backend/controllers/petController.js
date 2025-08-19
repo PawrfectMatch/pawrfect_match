@@ -9,4 +9,19 @@ const getAllPets = async(req,res) =>{
     }
 }
 
-module.exports = {getAllPets}
+
+const getPetById = async(req,res) => {
+    const {id} = req.params
+    try{
+        const pet = await Pet.findById(id)
+
+        if(!pet){
+            return res.status(404).json({message: "Pet not found"})
+        }
+    res.status(200).json(pet)
+    }catch(error){
+        res.status(500).jason({message:"Error fetching pet",error})
+    }
+}
+
+module.exports = {getAllPets, getPetById}
