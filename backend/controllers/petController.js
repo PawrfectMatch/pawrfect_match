@@ -24,4 +24,19 @@ const getPetById = async(req,res) => {
     }
 }
 
-module.exports = {getAllPets, getPetById}
+
+const createPet = async(req,res) =>{
+    try{
+        const petData = req.body
+        const newPet = new Pet(petData)
+        const savedPet = await newPet.save()
+        
+        res.status(200).json(savedPet)
+    }catch(error){
+        res.status(500).json({message:"Error creating pet",error})
+    }
+}
+
+
+
+module.exports = {getAllPets, getPetById, createPet}
