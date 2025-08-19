@@ -54,5 +54,20 @@ const updatePet = async(req,res) =>{
 }
 
 
+const deletePet = async(req,res) =>{
+    const {id} = req.params
 
-module.exports = {getAllPets, getPetById, createPet, updatePet}
+    try{
+        const deletedPet = await Pet.findByIdAndDelete(id)
+        if(!deletedPet){
+            res.status(404).json({message:"Pet not found"})
+        }
+        res.status(200).json({message:"Pet deleted successfully"})
+    }catch(error){
+        res.status(500).json({message:"Error deleting pet".error})
+    }
+}
+
+
+
+module.exports = {getAllPets, getPetById, createPet, updatePet, deletePet}
