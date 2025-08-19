@@ -30,12 +30,12 @@ const userSchema = new Schema(
     avatar: {
       type: String,
     },
-    // pets: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: "Pet",
-    //   },
-    // ],
+    pets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Pet",
+      },
+    ],
   },
   { timestamps: true }
 );
