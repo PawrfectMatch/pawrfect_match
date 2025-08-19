@@ -3,11 +3,14 @@ const app = express();
 require('dotenv').config(); 
 const db = require("./config/db")
 const cors = require("cors");
+const usersRouter = require("./routes/usersRoutes")
 
 //Middleware
 app.use(cors());
 app.use(express.json());
 
+//Routes
+app.use("/api/users", usersRouter)
 
 app.use("/", (req, res) => {
     res.send("Hello World")
