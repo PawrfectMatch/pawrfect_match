@@ -16,6 +16,11 @@ const registerUser = async (req, res) => {
   try {
     const { firstName, lastName, email, username, password, avatar } = req.body;
 
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(400).json({ msg: "Username or email already taken" });
+    }
+
     const hash = await hashPassword(password);
 
     const newUser = new User({
@@ -74,8 +79,10 @@ const refreshUserToken = async (req, res) => {
 
     res.json({ accessToken: accessToken });
   } catch (err) {
-    if(err.name === "TokenExpiredError")  return res.status(401).json({ msg: "Unauthorized. Please login again." });
-    if(err.name === "JsonWebTokenError")  return res.status(403).json({ msg: "Invalid. Please login again." });
+    if (err.name === "TokenExpiredError")
+      return res.status(401).json({ msg: "Unauthorized. Please login again." });
+    if (err.name === "JsonWebTokenError")
+      return res.status(403).json({ msg: "Invalid. Please login again." });
     res
       .status(err.status || 500)
       .json({ msg: err.message || "Internal server error" });
