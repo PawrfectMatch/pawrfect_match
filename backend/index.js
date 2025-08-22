@@ -3,6 +3,7 @@ const app = express();
 require('dotenv').config(); 
 const db = require("./config/db")
 const cors = require("cors");
+const cookieParser = require('cookie-parser')
 
 const usersRouter = require("./routes/usersRoutes");
 const authRouter = require("./routes/authRoutes");
@@ -12,6 +13,7 @@ const petRoutes = require('./routes/petRoutes')
 //Middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser())
 
 
 //Routes
