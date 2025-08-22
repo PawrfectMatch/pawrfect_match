@@ -20,7 +20,7 @@ const getPetById = async(req,res) => {
         }
     res.status(200).json(pet)
     }catch(error){
-        res.status(500).jason({message:"Error fetching pet",error})
+        res.status(500).json({message:"Error fetching pet",error})
     }
 }
 
