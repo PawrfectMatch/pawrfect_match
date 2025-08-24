@@ -1,13 +1,26 @@
 import React from "react";
+import { Box, Grid, Typography } from "@mui/material";
 import PetCard from "./PetCard";
 
-const PetGrid = ({ pets }) => {
-  if (!pets || pets.length === 0) return <p>No pets found.</p>;
+const PetGrid = ({ pets, maxWidth = 900 }) => {
+  if (!pets || pets.length === 0) {
+    return (
+      <Typography variant="body1" color="text.secondary">
+        No pets found.
+      </Typography>
+    );
+  }
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-      {pets.map(pet => <PetCard key={pet._id} pet={pet} />)}
-    </div>
+    <Box sx={{ width: "100%", mx: "auto", maxWidth }}>
+      <Grid container spacing={2} justifyContent="center">
+        {pets.map((pet) => (
+          <Grid key={pet._id} item xs={12} sm={6} md={4} lg={3}>
+            <PetCard pet={pet} />
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 };
 

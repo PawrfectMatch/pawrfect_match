@@ -1,31 +1,76 @@
 import React, { useState } from "react";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardMedia,
+  CardActions,
+  Typography,
+  Chip,
+  Button,
+  Stack,
+  Collapse,
+  Box,
+} from "@mui/material";
 import PetDetails from "./PetDetails";
 
 const PetCard = ({ pet }) => {
-  const [selected, setSelected] = useState(false);
+  const [open, setOpen] = useState(false);
+  const fallback =
+    "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop";
 
   return (
-    <div style={{ border: "1px solid #ccc", borderRadius: "8px", padding: "1rem", width: "200px" }}>
-      <img
-        src={pet.image_url || "https://via.placeholder.com/150"}
-        alt={pet.name}
-        style={{ width: "100%", borderRadius: "8px" }}
+    <Card
+      sx={{
+        width: "100%",       // 🔹 γεμίζει τη στήλη
+        maxWidth: 360,       // optional upper bound
+        borderRadius: 3,
+        boxShadow: 2,
+        bgcolor: "background.paper",
+        color: "primary.dark",
+      }}
+    >
+      <CardHeader
+        title={
+          <Typography variant="h6" noWrap sx={{ color: "primary.dark" }}>
+            {pet.name}
+          </Typography>
+        }
+        subheader={
+          <Typography variant="body2" noWrap sx={{ color: "info.dark" }}>
+            {pet.species} {pet.breed ? `• ${pet.breed}` : ""}
+          </Typography>
+        }
       />
-      <h3>{pet.name}</h3>
-      <p>{pet.species} - {pet.breed || "Unknown"}</p>
-      <p>Age: {pet.age}</p>
-      <p>Gender: {pet.gender}</p>
-      <p>{pet.adopted ? "Adopted" : "Available"}</p>
-
-      <button
-        onClick={() => setSelected(!selected)}
-        style={{ marginTop: "0.5rem", padding: "0.3rem 0.6rem", borderRadius: "4px", border: "none", backgroundColor: "#007bff", color: "white", cursor: "pointer" }}
-      >
-        {selected ? "Hide Details" : "View Details"}
-      </button>
-
-      {selected && <PetDetails pet={pet} />}
-    </div>
+      <CardMedia
+        component="img"
+        sx={{ height: 160, objectFit: "cover" }}
+        image={pet.image_url || fallback}
+        alt={pet.name}
+        loading="lazy"
+      />
+      <CardContent>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Chip label={`Age: ${pet.age}`} size="small" variant="outlined"
+                sx={{ color: "primary.dark", borderColor: "primary.dark" }} />
+          <Chip label={pet.gender} size="small" variant="outlined"
+                sx={{ color: "primary.dark", borderColor: "primary.dark" }} />
+          <Chip label={pet.adopted ? "Adopted" : "Available"} size="small"
+                color={pet.adopted ? "warning" : "success"}
+                variant={pet.adopted ? "outlined" : "filled"} />
+        </Stack>
+      </CardContent>
+      <CardActions sx={{ px: 2, pb: 2 }}>
+        <Button variant="contained" color="primary" fullWidth onClick={() => setOpen(v => !v)}>
+          {open ? "Hide Details" : "View Details"}
+        </Button>
+      </CardActions>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <Box sx={{ px: 2, pb: 2 }}>
+          <PetDetails pet={pet} />
+        </Box>
+      </Collapse>
+    </Card>
   );
 };
 
