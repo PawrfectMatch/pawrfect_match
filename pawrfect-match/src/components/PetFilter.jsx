@@ -100,9 +100,9 @@ const PetFilter = ({ allPets = [], onFilterChange }) => {
             value={selectedSpecies}
             onChange={(e) => setSelectedSpecies(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
+            <MenuItem value="" sx={{ color: "primary.dark" }}>All</MenuItem>
             {speciesOptions.map((sp) => (
-              <MenuItem key={sp} value={sp}>
+              <MenuItem key={sp} value={sp} sx={{ color: "primary.dark" }}>
                 {sp}
               </MenuItem>
             ))}
@@ -118,9 +118,9 @@ const PetFilter = ({ allPets = [], onFilterChange }) => {
             value={selectedGender}
             onChange={(e) => setSelectedGender(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Male">Male</MenuItem>
-            <MenuItem value="Female">Female</MenuItem>
+            <MenuItem value="" sx={{ color: "primary.dark" }}>All</MenuItem>
+            <MenuItem value="Male" sx={{ color: "primary.dark" }}>Male</MenuItem>
+            <MenuItem value="Female" sx={{ color: "primary.dark" }}>Female</MenuItem>
           </Select>
         </FormControl>
 
@@ -133,25 +133,25 @@ const PetFilter = ({ allPets = [], onFilterChange }) => {
             value={selectedAdopted}
             onChange={(e) => setSelectedAdopted(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Available">Available</MenuItem>
-            <MenuItem value="Adopted">Adopted</MenuItem>
+            <MenuItem value="" sx={{ color: "primary.dark" }}>All</MenuItem>
+            <MenuItem value="Available" sx={{ color: "primary.dark" }}>Available</MenuItem>
+            <MenuItem value="Adopted" sx={{ color: "primary.dark" }}>Adopted</MenuItem>
           </Select>
         </FormControl>
 
         {/* Age range */}
         <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel id="filter-age-label" >Age</InputLabel>
+          <InputLabel id="filter-age-label"  sx={{ color: "primary.dark" }}>Age</InputLabel>
           <Select
             labelId="filter-age-label"
             label="Age"
             value={selectedAgeRange}
             onChange={(e) => setSelectedAgeRange(e.target.value)}
           >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="0-1">0–1</MenuItem>
-            <MenuItem value="2-5">2–5</MenuItem>
-            <MenuItem value="6+">6+</MenuItem>
+            <MenuItem value="" sx={{ color: "primary.dark" }}>All</MenuItem>
+            <MenuItem value="0-1" sx={{ color: "primary.dark" }}>0–1</MenuItem>
+            <MenuItem value="2-5" sx={{ color: "primary.dark" }}>2–5</MenuItem>
+            <MenuItem value="6+" sx={{ color: "primary.dark" }}>6+</MenuItem>
           </Select>
         </FormControl>
 
