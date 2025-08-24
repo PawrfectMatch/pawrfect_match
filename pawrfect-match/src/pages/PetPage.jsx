@@ -4,6 +4,8 @@ import usePets from "../hooks/usePets";
 import useSearchPets from "../hooks/useSearchPets";
 import PetGrid from "../components/PetGrid";
 import PetFilter from "../components/PetFilter";
+import { ThemeProvider, CssBaseline, Container} from "@mui/material";
+import { theme } from "../theme/createTheme"
 
 const PetPage = () => {
   const { allPets, loading, error } = usePets();
@@ -27,6 +29,9 @@ const PetPage = () => {
   if (error) return <p>{error}</p>;
 
   return (
+    <ThemeProvider theme={theme}>
+        <CssBaseline />
+        
     <div style={{ padding: "2rem" }}>
       <h1 style={{ textAlign: "center", marginBottom: "2rem" }}>🐾 Our Pets</h1>
 
@@ -49,8 +54,12 @@ const PetPage = () => {
       <PetFilter allPets={allPets} onFilterChange={setFilteredByDropdown} />
 
       {/* Grid με τελικά pets */}
-      <PetGrid pets={petsToDisplay} />
+      
+      <PetGrid pets={petsToDisplay}/>
+      
     </div>
+    
+    </ThemeProvider>
   );
 };
 
