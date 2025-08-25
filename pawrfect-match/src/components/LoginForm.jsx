@@ -1,4 +1,6 @@
 import axios from "axios";
+import { useState } from "react";
+import {useNavigate} from "react-router-dom";
 import MailLockOutlinedIcon from "@mui/icons-material/MailLockOutlined";
 import {
   Box,
@@ -8,27 +10,52 @@ import {
   Avatar,
   Button,
   Link,
+  Snackbar
 } from "@mui/material";
 
 export default function LoginForm() {
-  async function loginAction(formData) {
-    const username = formData.get("username");
-    const password = formData.get("password");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState([]);
+
+  const navigate = useNavigate()
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!username.trim()) newErrors.username = "Username is required";
+    if (!password.trim()) newErrors.password = "Password is required";
+    else if (password.length < 6)
+      newErrors.password = "Password must be at least 6 characters";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // true if valid, false if array not empty
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return; // if false stops submission
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/auth/login",
-        { username, password }
+        { username, password },
+        { withCredentials: true }
       );
-      console.log("Login success", response.data);
+      console.log("Login success", response.data.accessToken);
+      localStorage.setItem("accessToken", response.data.accessToken);
+      setErrors({});
+      navigate("/pets")
     } catch (err) {
-      console.log(err);
+      setErrors({ server: err.response?.data?.msg || "Login failed" });
+      console.log(err.response.data.msg);
     }
-  }
+  };
 
   return (
     <Box
       component="form"
-      action={loginAction}
+      onSubmit={handleSubmit}
       noValidate
       elevation={10}
       sx={{
@@ -65,6 +92,10 @@ export default function LoginForm() {
         aria-label="
             Enter your username"
         name="username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        error={!!errors.username} // converts error.username into a boolean, so error= true or false
+        helperText={errors.username}
       ></TextField>
       <TextField
         sx={{ mb: 5 }}
@@ -74,6 +105,10 @@ export default function LoginForm() {
         aria-label="
             Enter your password"
         name="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        error={!!errors.password} // converts error.password into a boolean, so error= true or false
+        helperText={errors.password}
       ></TextField>
       <Button
         type="submit"
