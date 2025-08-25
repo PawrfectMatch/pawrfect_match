@@ -1,3 +1,4 @@
+// main
 import React, { useState } from "react";
 import {
   Card,
@@ -16,14 +17,15 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LaunchIcon from "@mui/icons-material/Launch";
 import InfoIcon from "@mui/icons-material/Info";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import PetDetails from "./PetDetails";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import { useNavigate } from "react-router-dom";
 
-const PetCard = ({ pet }) => {
+const PetCard = ({ pet, showRemove = false }) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, removeFavorite } = useFavorites();
 
   const favoriteNow = isFavorite(pet._id);
   const isAdopted = !!pet.adopted;
@@ -42,7 +44,7 @@ const PetCard = ({ pet }) => {
   return (
     <Card
       sx={{
-        width: 380,               // 🔹 σταθερό πλάτος για ΟΛΕΣ τις κάρτες
+        width: 380, // σταθερό πλάτος κάρτας
         boxSizing: "border-box",
         borderRadius: 3,
         boxShadow: 2,
@@ -102,6 +104,15 @@ const PetCard = ({ pet }) => {
                 </IconButton>
               </span>
             </Tooltip>
+
+            {/* Remove μόνο στο /favorites */}
+            {showRemove && (
+              <Tooltip title="Remove from favorites">
+                <IconButton color="error" onClick={() => removeFavorite(pet._id)}>
+                  <DeleteOutlineIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </Stack>
         }
       />

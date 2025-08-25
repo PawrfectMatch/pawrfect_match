@@ -1,8 +1,10 @@
+// main
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
+  // φορτώνει από localStorage στο πρώτο render
   const [favorites, setFavorites] = useState(() => {
     try {
       const raw = localStorage.getItem("favorites");
@@ -12,16 +14,21 @@ export const FavoritesProvider = ({ children }) => {
     }
   });
 
+  // αποθήκευση σε localStorage σε κάθε αλλαγή
   useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    try {
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+    } catch {
+      // ignore quota errors
+    }
   }, [favorites]);
 
-  const isFavorite = (petId) => favorites.some((p) => p._id === petId);
+  const isFavorite = (id) => favorites.some((p) => p._id === id);
 
-  // 🔒 Μπλοκάρουμε αλλαγές για adopted pets (ούτε add, ούτε remove)
+  // δεν επιτρέπουμε add/remove για adopted (UI history mode)
   const toggleFavorite = (pet) => {
     if (!pet) return;
-    if (pet.adopted) return; // history mode: δεν αλλάζουμε το state
+    if (pet.adopted) return;
 
     setFavorites((prev) => {
       const exists = prev.some((p) => p._id === pet._id);
@@ -30,13 +37,18 @@ export const FavoritesProvider = ({ children }) => {
     });
   };
 
-  // helper για ενημέρωση snapshot (π.χ. όταν γίνει adopted από φόρμα)
-  const updateFavorite = (petId, patch) => {
-    setFavorites((prev) => prev.map((p) => (p._id === petId ? { ...p, ...patch } : p)));
+  // αφαίρεση ανεξάρτητα από adopted (χρησιμοποιείται στο /favorites)
+  const removeFavorite = (id) => {
+    setFavorites((prev) => prev.filter((p) => p._id !== id));
+  };
+
+  // helper αν θες να ενημερώνεις snapshot (π.χ. adopted:true μετά από φόρμα)
+  const updateFavorite = (id, patch) => {
+    setFavorites((prev) => prev.map((p) => (p._id === id ? { ...p, ...patch } : p)));
   };
 
   const value = useMemo(
-    () => ({ favorites, isFavorite, toggleFavorite, updateFavorite }),
+    () => ({ favorites, isFavorite, toggleFavorite, removeFavorite, updateFavorite }),
     [favorites]
   );
 
