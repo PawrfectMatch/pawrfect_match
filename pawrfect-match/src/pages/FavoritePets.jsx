@@ -31,7 +31,7 @@ export default function FavoritePets() {
             component={RouterLink}
             to="/pets"
             variant="contained"
-            color="primary"
+            color="secondary"
           >
             BACK TO SEARCH
           </Button>

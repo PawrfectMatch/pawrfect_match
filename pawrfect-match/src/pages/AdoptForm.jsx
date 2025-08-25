@@ -1,145 +1,193 @@
+//main
 import React, { useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   Button,
-  Grid,
   Paper,
-  TextField,
   Typography,
+  Avatar,
+  Grid,
+  Stepper,
+  Step,
+  StepLabel,
   Snackbar,
   Alert,
-  Avatar,
 } from "@mui/material";
 import { ThemeProvider, CssBaseline } from "@mui/material";
-import { theme } from "../theme/createTheme";
-import { useFavorites } from "../context/FavoritesContext.jsx";
+import { adoptTheme } from "../theme/adoptTheme";
+
+// Step components
+import Step1BasicsHousing from "../components/adoption/Step1BasicsHousing.jsx";
+import Step2HouseholdPetsCare from "../components/adoption/Step2HouseholdPetsCare.jsx";
+import Step3Review from "../components/adoption/Step3Review.jsx";
+
+const steps = ["Basics & Housing", "Household & Care", "Review & Submit"];
+
+const initialForm = {
+  // step 1
+  fullName: "",
+  email: "",
+  phone: "",
+  contactMethod: "Email",
+  city: "",
+  residentialStatus: "",
+  landlordPermission: "",
+  homeType: "",
+  outdoorSpace: "",
+  fencing: "",
+  // step 2
+  adults: "",
+  children: "",
+  childrenAges: "",
+  allergies: "",
+  hasPets: "",
+  petTypes: "",
+  spayed: "",
+  vaccinated: "",
+  hoursAlone: "",
+  activityLevel: "",
+  sleepPlace: "",
+  caregiver: "",
+  whyThisPet: "",
+  // consents (step 3)
+  confirmInfo: false,
+  agreePolicies: false,
+  consentContact: false,
+};
 
 export default function AdoptForm() {
   const { petId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { updateFavorite } = useFavorites();
-
-  // παίρνουμε snapshot pet από το navigate state (δεν κάνουμε fetch για τώρα)
   const pet = location.state?.pet;
 
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    message: "",
-  });
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState(initialForm);
   const [snack, setSnack] = useState({ open: false, msg: "", severity: "success" });
 
-  const disabled = useMemo(
-    () => !form.fullName || !form.email,
-    [form.fullName, form.email]
-  );
-
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
-  const handleSubmit = async (e) => {
+  const canGoNext = useMemo(() => {
+    if (step === 0) {
+      return form.fullName && form.email && form.residentialStatus && form.homeType;
+    }
+    if (step === 1) {
+      return form.hoursAlone && form.activityLevel && form.sleepPlace;
+    }
+    return true;
+  }, [step, form]);
+
+  const handleNext = () => setStep((s) => Math.min(s + 1, steps.length - 1));
+  const handleBack = () => setStep((s) => Math.max(s - 1, 0));
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    // 🔹 ΕΔΩ αργότερα θα βάλουμε το πραγματικό API (PUT /api/pets/:id { adopted:true })
-    // Για τώρα: ενημέρωσε το snapshot στα favorites (αν υπάρχει) για συνέπεια στην UI.
-    updateFavorite(petId, { adopted: true });
-
+    // later: POST /api/adoptions (petId + form)
     setSnack({ open: true, msg: "Adoption request submitted! 🎉", severity: "success" });
-
-    // Μικρό delay για να δει ο χρήστης το μήνυμα και γύρνα στη λίστα
-    setTimeout(() => navigate("/pets"), 800);
+    setTimeout(() => navigate("/pets"), 900);
   };
+
+  const fallback =
+    "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop";
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={adoptTheme}>
       <CssBaseline />
-      <Box sx={{ p: 2, maxWidth: 720, mx: "auto" }}>
-        <Typography variant="h4" sx={{ mb: 2, textAlign: "center" }}>
-          Adopt your new friend
+      <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 900, mx: "auto" }}>
+        {/* Page Title */}
+        <Typography variant="h4" sx={{ textAlign: "center", mb: 2, color: "primary.dark" }}>
+          Adoption Application
         </Typography>
 
-        {!pet ? (
-          <Typography color="warning.main">
-            No pet data provided. Please go back and click “ADOPT” from a pet card.
-          </Typography>
-        ) : (
-          <Paper sx={{ p: 2, mb: 2 }}>
+        {/* Pet summary */}
+        <Paper sx={{ p: 2, mb: 2 }}>
+          {!pet ? (
+            <Typography color="warning.main">
+              No pet data provided. Please go back and click “ADOPT” from a pet card.
+            </Typography>
+          ) : (
             <Grid container spacing={2} alignItems="center">
               <Grid item>
-                <Avatar
-                  src={pet.image_url}
-                  alt={pet.name}
-                  sx={{ width: 72, height: 72 }}
-                />
+                <Avatar src={pet.image_url || fallback} alt={pet.name} sx={{ width: 72, height: 72 }} />
               </Grid>
               <Grid item>
-                <Typography variant="h6">{pet.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="h6" sx={{ color: "primary.dark" }}>{pet.name}</Typography>
+                <Typography variant="body2" sx={{ color: "primary.dark", opacity: 0.8 }}>
                   {pet.species} {pet.breed ? `• ${pet.breed}` : ""} • {pet.gender}
                 </Typography>
               </Grid>
             </Grid>
-          </Paper>
-        )}
+          )}
+        </Paper>
 
-        <Paper component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Full name"
-                name="fullName"
-                value={form.fullName}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                type="email"
-                label="Email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Phone"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Message"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                fullWidth
-                multiline
-                minRows={3}
-                placeholder="Tell us a bit about your home and why you want to adopt."
-              />
-            </Grid>
-            <Grid item xs={12} display="flex" gap={2} justifyContent="flex-end">
-              <Button variant="outlined" onClick={() => navigate(-1)}>
-                Cancel
+        {/* Stepper */}
+        <Paper sx={{ p: { xs: 2, md: 3 } }}>
+          <Stepper
+            activeStep={step}
+            alternativeLabel
+            sx={{
+              mb: 3,
+              "& .MuiStepLabel-label": { color: "primary.dark !important" },
+            }}
+          >
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+
+          <form onSubmit={handleSubmit}>
+            {step === 0 && <Step1BasicsHousing form={form} onChange={handleChange} />}
+            {step === 1 && <Step2HouseholdPetsCare form={form} onChange={handleChange} />}
+            {step === 2 && <Step3Review form={form} pet={pet} onChange={handleChange} />}
+
+            {/* Nav buttons */}
+            <Box
+              sx={{
+                mt: 3,
+                display: "flex",
+                gap: 2,
+                justifyContent: "space-between",
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={handleBack}
+                disabled={step === 0}
+                size="large"
+                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700, color: "primary.dark", borderColor: "primary.dark" }}
+              >
+                Back
               </Button>
-              <Button type="submit" variant="contained" disabled={disabled}>
-                Submit
-              </Button>
-            </Grid>
-          </Grid>
+
+              {step < steps.length - 1 ? (
+                <Button
+                  variant="contained"
+                  onClick={handleNext}
+                  disabled={!canGoNext}
+                  size="large"
+                  sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={!form.confirmInfo || !form.agreePolicies}
+                  size="large"
+                  sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
+                >
+                  Submit
+                </Button>
+              )}
+            </Box>
+          </form>
         </Paper>
 
         <Snackbar
