@@ -3,10 +3,10 @@ import { createTheme } from "@mui/material/styles";
 export const theme = createTheme({
   palette: {
     primary: {
-      light: "#4a6382",
-      main: "#253d5c", // deep blue background
-      dark: "#15293d",
-      contrastText: "#ffffff", // white text on blue buttons
+      light: "#e3aeb4",
+      main: "#c6878e", // muted pink
+      dark: "#8f5c62",
+      contrastText: "#ffffff",
     },
     secondary: {
       light: "#f1c6c1",
@@ -40,13 +40,13 @@ export const theme = createTheme({
     },
     background: {
       default: "#253d5c", // deep blue page background
-      paper: "#fde6de", // soft cream for cards/forms
-      secondary: "#969696",
+      paper: "#969696", // soft cream for cards/forms
+      secondary: "#15293d",
     },
     text: {
       primary: "#ffffff", // white for main text
       secondary: "#f0e6dc", // cream/soft text for secondary
-      disabled: "#c4c4c4", // muted gray
+      disabled: "#a19da3", // muted gray
     },
   },
 });
