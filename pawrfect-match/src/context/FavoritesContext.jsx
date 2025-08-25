@@ -18,20 +18,21 @@ export const FavoritesProvider = ({ children }) => {
 
   const isFavorite = (petId) => favorites.some((p) => p._id === petId);
 
+  // 🔒 Μπλοκάρουμε αλλαγές για adopted pets (ούτε add, ούτε remove)
   const toggleFavorite = (pet) => {
+    if (!pet) return;
+    if (pet.adopted) return; // history mode: δεν αλλάζουμε το state
+
     setFavorites((prev) => {
       const exists = prev.some((p) => p._id === pet._id);
       if (exists) return prev.filter((p) => p._id !== pet._id);
-      // κρατάμε snapshot του pet αυτή τη στιγμή
       return [{ ...pet }, ...prev];
     });
   };
 
-  // μικρό helper για να ενημερώνουμε ένα pet μέσα στα favorites (π.χ. adopted)
+  // helper για ενημέρωση snapshot (π.χ. όταν γίνει adopted από φόρμα)
   const updateFavorite = (petId, patch) => {
-    setFavorites((prev) =>
-      prev.map((p) => (p._id === petId ? { ...p, ...patch } : p))
-    );
+    setFavorites((prev) => prev.map((p) => (p._id === petId ? { ...p, ...patch } : p)));
   };
 
   const value = useMemo(
@@ -39,9 +40,7 @@ export const FavoritesProvider = ({ children }) => {
     [favorites]
   );
 
-  return (
-    <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>
-  );
+  return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
 };
 
 export const useFavorites = () => useContext(FavoritesContext);

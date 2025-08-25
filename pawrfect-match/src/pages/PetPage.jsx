@@ -46,7 +46,7 @@ const PetPage = () => {
             variant="contained"
             color="secondary"
           >
-            Go to Favorites
+           Favorites
           </Button>
         </Box>
 
@@ -69,7 +69,7 @@ const PetPage = () => {
         <PetFilter allPets={allPets} onFilterChange={setFilteredByDropdown} />
 
         {/* Grid με αποτέλεσμα: filters -> search */}
-        <PetGrid pets={searchedPets} />
+        <PetGrid pets={searchedPets} maxWidth={1000} />
       </Box>
     </ThemeProvider>
   );
