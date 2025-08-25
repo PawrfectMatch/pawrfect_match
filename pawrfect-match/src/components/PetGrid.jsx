@@ -1,8 +1,9 @@
+// main
 import React from "react";
 import { Box, Grid, Typography } from "@mui/material";
 import PetCard from "./PetCard";
 
-const PetGrid = ({ pets, maxWidth = 900 }) => {
+const PetGrid = ({ pets, maxWidth = 1000, showRemove = false }) => {
   if (!pets || pets.length === 0) {
     return (
       <Typography variant="body1" color="text.secondary">
@@ -13,10 +14,15 @@ const PetGrid = ({ pets, maxWidth = 900 }) => {
 
   return (
     <Box sx={{ width: "100%", mx: "auto", maxWidth }}>
-      <Grid container spacing={2} justifyContent="center">
+      <Grid
+        container
+        spacing={2}
+        justifyContent="center"   // κεντραρισμένο κάτω από το filter bar
+        alignItems="flex-start"
+      >
         {pets.map((pet) => (
-          <Grid key={pet._id} item xs={12} sm={6} md={4} lg={3}>
-            <PetCard pet={pet} />
+          <Grid key={pet._id} item xs="auto" sx={{ display: "flex" }}>
+            <PetCard pet={pet} showRemove={showRemove} />
           </Grid>
         ))}
       </Grid>
