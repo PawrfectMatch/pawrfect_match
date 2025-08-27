@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const { validationResult } = require("express-validator");
 const validateObjectId = require("../validations/objectIdValidation");
+const { hashPassword } = require("../utils/passwordUtils");
 
 const getUsers = async (req, res) => {
   try {
@@ -37,6 +38,7 @@ const updateUser = async (req, res) => {
     if (!errors.isEmpty()) return res.json(errors);
 
     const patchedUser = req.body;
+    patchedUser.password = await hashPassword(req.body.password)
 
     const validatedId = validateObjectId(req.params.id);
     if (!validatedId) return res.status(404).json({ msg: "Bad request" });
