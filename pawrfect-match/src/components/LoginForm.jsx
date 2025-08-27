@@ -31,51 +31,53 @@ export default function LoginForm() {
     if (!password.trim()) newErrors.password = "Password is required";
     else if (password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
+    else if (!password.match(/[A-Z]/))
+      newErrors.password = "Password must contain at least one capital letter";
+    else if (!password.match(/[a-z]/))
+      newErrors.password =
+        "Password must contain at least one lowercase letter";
+    else if (!password.match(/[0-9]/))
+      newErrors.password = "Password must contain at least one number";
+    else if (!password.match(/[^a-zA-Z0-9]/))
+      newErrors.password =
+        "Password must contain at least one special character";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; // true if valid, false if array not empty
   };
 
   // Form submit
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate()) return; 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-  try {
-    const response = await axios.post(
-      "http://localhost:8000/api/auth/login",
-      { username, password },
-      { withCredentials: true }
-    );
-    console.log("Login success", response.data.accessToken);
-    localStorage.setItem("accessToken", response.data.accessToken);
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/auth/login",
+        { username, password },
+        { withCredentials: true }
+      );
 
-    setErrors({}); 
+      localStorage.setItem("accessToken", response.data.accessToken);
 
-    setAlertSeverity("success");
-    setAlertMessage("Login success!");
-    setOpenAlert(true); 
+      setErrors({});
 
- 
-    setTimeout (() => navigate("/pets"), 1000); 
-  
-  } catch (err) {
-    const errorMessage = err.response?.data?.msg || err.message || "Login failed";
+      setAlertSeverity("success");
+      setAlertMessage("Login success!");
+      setOpenAlert(true); // show Snackbar
 
-    // Keep validation errors as object, but store server error separately
-    setErrors((prev) => ({ ...prev, server: errorMessage }));
-    setAlertSeverity("error");
-    setAlertMessage(errorMessage);
-    setOpenAlert(true); // show Snackbar
-    console.log(errorMessage);
-  }
-};
+      setTimeout(() => navigate("/pets"), 1000);
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.msg || err.message || "Login failed";
 
-
-  // Notification's SnackBar functionality
-  // const handleSnackbar = () => {
-  //   setOpenAlert(true);
-  // };
+      // Keep validation errors as object, but store server error separately
+      setErrors((prev) => ({ ...prev, server: errorMessage }));
+      setAlertSeverity("error");
+      setAlertMessage(errorMessage);
+      setOpenAlert(true); // show Snackbar
+    }
+  };
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -95,9 +97,11 @@ const handleSubmit = async (e) => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
+        alignItems: "center",
         p: 5,
-        height: "100%",
-        width: "80%",
+        height: "100vh",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       <Container
@@ -119,7 +123,7 @@ const handleSubmit = async (e) => {
       <TextField
         variant="filled"
         color="secondary"
-        sx={{ my: 2 }}
+        sx={{ my: 2, width: { xs: "100%", sm: "80%" } }}
         label="Username"
         type="text"
         aria-label="
@@ -131,7 +135,7 @@ const handleSubmit = async (e) => {
         helperText={errors.username}
       ></TextField>
       <TextField
-        sx={{ mb: 5 }}
+        sx={{ mb: 5, width: { xs: "100%", sm: "80%" } }}
         label="Password"
         variant="filled"
         type="password"
@@ -150,12 +154,12 @@ const handleSubmit = async (e) => {
       >
         Sign In
       </Button>
-   <Notification
-  handleClose={handleClose}
-  openAlert={openAlert}
-  alertSeverity={alertSeverity}
-  alertMessage={alertMessage}
-/>
+      <Notification
+        handleClose={handleClose}
+        openAlert={openAlert}
+        alertSeverity={alertSeverity}
+        alertMessage={alertMessage}
+      />
       <Typography color="text.disabled" sx={{ textAlign: "center", mt: 8 }}>
         Don't have an account? <Link sx={{ ml: 1 }}>Sign Up</Link>
       </Typography>
