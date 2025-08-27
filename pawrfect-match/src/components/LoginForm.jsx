@@ -96,10 +96,10 @@ export default function LoginForm() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        justifyContent: {xs: "flex-start", md: "center"},
         alignItems: "center",
         p: 5,
-        height: "100vh",
+        height: "100%",
         width: "100%",
         boxSizing: "border-box",
       }}
