@@ -3,7 +3,12 @@ import * as React from "react";
 import { Snackbar, Alert, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-export default function Notification({ openAlert, handleClose, alertMessage, alertSeverity }) {
+export default function Notification({
+  openAlert,
+  handleClose,
+  alertMessage,
+  alertSeverity,
+}) {
   const action = (
     <React.Fragment>
       <IconButton
@@ -24,6 +29,7 @@ export default function Notification({ openAlert, handleClose, alertMessage, ale
         autoHideDuration={6000}
         onClose={handleClose}
         action={action}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert severity={alertSeverity}>{alertMessage}</Alert>
       </Snackbar>
