@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import Notification from "./Notification";
 import MailLockOutlinedIcon from "@mui/icons-material/MailLockOutlined";
 import {
   Box,
@@ -10,16 +11,19 @@ import {
   Avatar,
   Button,
   Link,
-  Snackbar
 } from "@mui/material";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState([]);
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState("error");
+  const [alertMessage, setAlertMessage] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
+  // Form validation
   const validate = () => {
     const newErrors = {};
 
@@ -32,24 +36,53 @@ export default function LoginForm() {
     return Object.keys(newErrors).length === 0; // true if valid, false if array not empty
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return; // if false stops submission
+  // Form submit
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validate()) return; 
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8000/api/auth/login",
-        { username, password },
-        { withCredentials: true }
-      );
-      console.log("Login success", response.data.accessToken);
-      localStorage.setItem("accessToken", response.data.accessToken);
-      setErrors({});
-      navigate("/pets")
-    } catch (err) {
-      setErrors({ server: err.response?.data?.msg || "Login failed" });
-      console.log(err.response.data.msg);
+  try {
+    const response = await axios.post(
+      "http://localhost:8000/api/auth/login",
+      { username, password },
+      { withCredentials: true }
+    );
+    console.log("Login success", response.data.accessToken);
+    localStorage.setItem("accessToken", response.data.accessToken);
+
+    setErrors({}); 
+
+    setAlertSeverity("success");
+    setAlertMessage("Login success!");
+    setOpenAlert(true); 
+
+ 
+    setTimeout (() => navigate("/pets"), 1000); 
+  
+  } catch (err) {
+    const errorMessage = err.response?.data?.msg || err.message || "Login failed";
+
+    // Keep validation errors as object, but store server error separately
+    setErrors((prev) => ({ ...prev, server: errorMessage }));
+    setAlertSeverity("error");
+    setAlertMessage(errorMessage);
+    setOpenAlert(true); // show Snackbar
+    console.log(errorMessage);
+  }
+};
+
+
+  // Notification's SnackBar functionality
+  // const handleSnackbar = () => {
+  //   setOpenAlert(true);
+  // };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
     }
+
+    setOpenAlert(false);
   };
 
   return (
@@ -117,6 +150,12 @@ export default function LoginForm() {
       >
         Sign In
       </Button>
+   <Notification
+  handleClose={handleClose}
+  openAlert={openAlert}
+  alertSeverity={alertSeverity}
+  alertMessage={alertMessage}
+/>
       <Typography color="text.disabled" sx={{ textAlign: "center", mt: 8 }}>
         Don't have an account? <Link sx={{ ml: 1 }}>Sign Up</Link>
       </Typography>
