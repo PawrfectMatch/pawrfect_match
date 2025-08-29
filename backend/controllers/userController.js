@@ -1,8 +1,11 @@
 const User = require("../models/userModel");
+const Pet = require("../models/petmodel");
 const { validationResult } = require("express-validator");
 const validateObjectId = require("../validations/objectIdValidation");
-const { hashPassword } = require("../utils/passwordUtils");
 
+// ----------------------
+// Υπάρχοντα endpoints
+// ----------------------
 const getUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -38,7 +41,6 @@ const updateUser = async (req, res) => {
     if (!errors.isEmpty()) return res.json(errors);
 
     const patchedUser = req.body;
-    patchedUser.password = await hashPassword(req.body.password)
 
     const validatedId = validateObjectId(req.params.id);
     if (!validatedId) return res.status(404).json({ msg: "Bad request" });
@@ -73,4 +75,99 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUser, updateUser, deleteUser };
+// ----------------------
+// 🔹 Favorites endpoints
+// ----------------------
+
+// Επιλογή πεδίων pet για μικρό payload
+const FAVORITE_PET_FIELDS =
+  "name species breed age gender adopted image_url description health_status createdAt updatedAt";
+
+const getMyFavorites = async (req, res) => {
+  try {
+    const me = await User.findById(req.user.id).populate({
+      path: "favorites",
+      select: FAVORITE_PET_FIELDS,
+    });
+    if (!me) return res.status(404).json({ msg: "User not found" });
+
+    res.status(200).json(me.favorites || []);
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ msg: err.message || "Internal server error" });
+  }
+};
+
+const addFavorite = async (req, res) => {
+  try {
+    const { petId } = req.params;
+
+    if (!validateObjectId(petId))
+      return res.status(400).json({ msg: "Invalid pet id" });
+
+    const pet = await Pet.findById(petId);
+    if (!pet) return res.status(404).json({ msg: "Pet not found" });
+
+    if (pet.adopted)
+      return res
+        .status(400)
+        .json({ msg: "Cannot favorite an adopted pet" });
+
+    // $addToSet για αποφυγή διπλοεγγραφών
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $addToSet: { favorites: petId } },
+      { new: true }
+    );
+
+    // Επιστρέφουμε την ενημερωμένη λίστα (populated)
+    const me = await User.findById(req.user.id).populate({
+      path: "favorites",
+      select: FAVORITE_PET_FIELDS,
+    });
+
+    res.status(200).json(me.favorites || []);
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ msg: err.message || "Internal server error" });
+  }
+};
+
+const removeFavorite = async (req, res) => {
+  try {
+    const { petId } = req.params;
+
+    if (!validateObjectId(petId))
+      return res.status(400).json({ msg: "Invalid pet id" });
+
+    await User.findByIdAndUpdate(
+      req.user.id,
+      { $pull: { favorites: petId } },
+      { new: true }
+    );
+
+    const me = await User.findById(req.user.id).populate({
+      path: "favorites",
+      select: FAVORITE_PET_FIELDS,
+    });
+
+    res.status(200).json(me.favorites || []);
+  } catch (err) {
+    res
+      .status(err.status || 500)
+      .json({ msg: err.message || "Internal server error" });
+  }
+};
+
+module.exports = {
+  getUsers,
+  getUser,
+  updateUser,
+  deleteUser,
+  // favorites
+  getMyFavorites,
+  addFavorite,
+  removeFavorite,
+};

@@ -1,5 +1,5 @@
-// main
-import React from "react";
+// src/pages/FavoritePets.jsx
+import React, { useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "../theme/createTheme";
@@ -8,20 +8,24 @@ import PetGrid from "../components/PetGrid";
 import { Link as RouterLink } from "react-router-dom";
 
 export default function FavoritePets() {
-  const { favorites } = useFavorites();
+  const { favorites, loadFavorites } = useFavorites();
+
+  // Φόρτωσε/συγχρόνισε με τον server όταν μπαίνουμε στη σελίδα
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ p: 2, maxWidth: 1000, mx: "auto" }}>
-        {/* Header: grid 2 στηλών για σταθερή απόσταση */}
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: "1fr auto",
             alignItems: "center",
-            columnGap: 2,   // σταθερή οριζόντια απόσταση τίτλου–κουμπιού
-            mb: 3,          // σταθερή κάθετη απόσταση από το περιεχόμενο
+            columnGap: 2,
+            mb: 3,
           }}
         >
           <Typography variant="h4" sx={{ m: 0 }}>
@@ -37,7 +41,6 @@ export default function FavoritePets() {
           </Button>
         </Box>
 
-        {/* Περιεχόμενο κάτω από header */}
         {!favorites || favorites.length === 0 ? (
           <Typography variant="body1" color="text.secondary" align="center">
             No favorites yet. Tap the heart on a pet to add it here.

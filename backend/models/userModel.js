@@ -29,7 +29,15 @@ const userSchema = new Schema(
     avatar: {
       type: String,
     },
+    // υπήρχε ήδη — το κρατάμε όπως είναι
     pets: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Pet",
+      },
+    ],
+    // 🔹 ΝΕΟ: favorites ανά χρήστη
+    favorites: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Pet",
