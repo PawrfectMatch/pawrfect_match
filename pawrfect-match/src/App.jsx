@@ -12,7 +12,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/pets" element={<PetPage />} />
+        <Route path="/" element={<PetPage />} />
         <Route
           path="/favorites"
           element={

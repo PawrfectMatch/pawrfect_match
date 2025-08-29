@@ -1,5 +1,12 @@
 // src/context/FavoritesContext.jsx
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import api from "../lib/apiClient";
 
 const FavoritesContext = createContext();
@@ -11,7 +18,8 @@ export const FavoritesProvider = ({ children }) => {
 
   const hasToken = () => !!localStorage.getItem("accessToken");
 
-  const loadFavorites = async () => {
+  // Φόρτωση favorites από server (σταθεροποιημένο με useCallback)
+  const loadFavorites = useCallback(async () => {
     if (!hasToken()) {
       setFavorites([]);
       return;
@@ -26,37 +34,47 @@ export const FavoritesProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Αρχικό load (αν ήδη υπάρχει token)
-  useEffect(() => {
-    loadFavorites();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isFavorite = (id) => favorites.some((p) => p._id === id);
+  // Αρχικό load
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
 
-  const toggleFavorite = async (pet) => {
-    if (!pet) return false;
-    if (!hasToken()) return false;
+  const isFavorite = useCallback(
+    (id) => favorites.some((p) => p._id === id),
+    [favorites]
+  );
 
-    try {
-      if (isFavorite(pet._id)) {
-        const { data } = await api.delete(`/api/users/me/favorites/${pet._id}`);
-        setFavorites(Array.isArray(data) ? data : []);
-      } else {
-        if (pet.adopted) return false;
-        const { data } = await api.post(`/api/users/me/favorites/${pet._id}`);
-        setFavorites(Array.isArray(data) ? data : []);
+  // Add/Remove μέσω backend — επιστρέφει ενημερωμένη λίστα
+  const toggleFavorite = useCallback(
+    async (pet) => {
+      if (!pet) return false;
+      if (!hasToken()) return false;
+
+      try {
+        if (favorites.some((p) => p._id === pet._id)) {
+          const { data } = await api.delete(
+            `/api/users/me/favorites/${pet._id}`
+          );
+          setFavorites(Array.isArray(data) ? data : []);
+        } else {
+          if (pet.adopted) return false;
+          const { data } = await api.post(
+            `/api/users/me/favorites/${pet._id}`
+          );
+          setFavorites(Array.isArray(data) ? data : []);
+        }
+        return true;
+      } catch (e) {
+        setError(e?.response?.data?.msg || "Failed to update favorites");
+        return false;
       }
-      return true;
-    } catch (e) {
-      setError(e?.response?.data?.msg || "Failed to update favorites");
-      return false;
-    }
-  };
+    },
+    [favorites]
+  );
 
-  const removeFavorite = async (id) => {
+  const removeFavorite = useCallback(async (id) => {
     if (!hasToken()) return false;
     try {
       const { data } = await api.delete(`/api/users/me/favorites/${id}`);
@@ -66,11 +84,14 @@ export const FavoritesProvider = ({ children }) => {
       setError(e?.response?.data?.msg || "Failed to remove favorite");
       return false;
     }
-  };
+  }, []);
 
-  const updateFavorite = (id, patch) => {
-    setFavorites((prev) => prev.map((p) => (p._id === id ? { ...p, ...patch } : p)));
-  };
+  // Local helper (αν χρειαστεί να ενημερώσεις πεδία ενός favorite)
+  const updateFavorite = useCallback((id, patch) => {
+    setFavorites((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, ...patch } : p))
+    );
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -83,10 +104,23 @@ export const FavoritesProvider = ({ children }) => {
       updateFavorite,
       loadFavorites,
     }),
-    [favorites, loading, error]
+    [
+      favorites,
+      loading,
+      error,
+      isFavorite,
+      toggleFavorite,
+      removeFavorite,
+      updateFavorite,
+      loadFavorites,
+    ]
   );
 
-  return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
+  return (
+    <FavoritesContext.Provider value={value}>
+      {children}
+    </FavoritesContext.Provider>
+  );
 };
 
 export const useFavorites = () => useContext(FavoritesContext);
