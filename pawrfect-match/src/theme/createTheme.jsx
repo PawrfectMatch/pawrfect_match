@@ -40,7 +40,7 @@ export const theme = createTheme({
     },
     background: {
       default: "#253d5c", // deep blue page background
-      paper: "#969696", // soft cream for cards/forms
+      paper: "#faf9f6", // soft cream for cards/forms
       secondary: "#15293d",
     },
     text: {
