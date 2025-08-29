@@ -1,4 +1,4 @@
-// main
+// src/components/PetCard.jsx
 import React, { useState } from "react";
 import {
   Card,
@@ -44,7 +44,7 @@ const PetCard = ({ pet, showRemove = false }) => {
   return (
     <Card
       sx={{
-        width: 380, // σταθερό πλάτος κάρτας
+        width: 380,
         boxSizing: "border-box",
         borderRadius: 3,
         boxShadow: 2,
@@ -65,12 +65,17 @@ const PetCard = ({ pet, showRemove = false }) => {
         }
         action={
           <Stack direction="row" spacing={0.5}>
-            {/* Favorite (disabled όταν adopted) */}
+            {/* Favorite */}
             <Tooltip title={heartTooltip}>
               <span>
                 <IconButton
                   aria-label={favoriteNow ? "unfavorite" : "favorite"}
-                  onClick={() => toggleFavorite(pet)}
+                  onClick={async () => {
+                    const ok = await toggleFavorite(pet);
+                    if (ok === false && !localStorage.getItem("accessToken")) {
+                      navigate("/login", { replace: true });
+                    }
+                  }}
                   sx={{ color: "error.main" }}
                   disabled={isAdopted}
                 >

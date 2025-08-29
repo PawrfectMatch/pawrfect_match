@@ -1,55 +1,89 @@
-// main
+// src/context/FavoritesContext.jsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import api from "../lib/apiClient";
 
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
-  // φορτώνει από localStorage στο πρώτο render
-  const [favorites, setFavorites] = useState(() => {
-    try {
-      const raw = localStorage.getItem("favorites");
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // αποθήκευση σε localStorage σε κάθε αλλαγή
-  useEffect(() => {
-    try {
-      localStorage.setItem("favorites", JSON.stringify(favorites));
-    } catch {
-      // ignore quota errors
+  const hasToken = () => !!localStorage.getItem("accessToken");
+
+  const loadFavorites = async () => {
+    if (!hasToken()) {
+      setFavorites([]);
+      return;
     }
-  }, [favorites]);
+    setLoading(true);
+    setError("");
+    try {
+      const { data } = await api.get("/api/users/me/favorites");
+      setFavorites(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError(e?.response?.data?.msg || "Failed to load favorites");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Αρχικό load (αν ήδη υπάρχει token)
+  useEffect(() => {
+    loadFavorites();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isFavorite = (id) => favorites.some((p) => p._id === id);
 
-  // δεν επιτρέπουμε add/remove για adopted (UI history mode)
-  const toggleFavorite = (pet) => {
-    if (!pet) return;
-    if (pet.adopted) return;
+  const toggleFavorite = async (pet) => {
+    if (!pet) return false;
+    if (!hasToken()) return false;
 
-    setFavorites((prev) => {
-      const exists = prev.some((p) => p._id === pet._id);
-      if (exists) return prev.filter((p) => p._id !== pet._id);
-      return [{ ...pet }, ...prev];
-    });
+    try {
+      if (isFavorite(pet._id)) {
+        const { data } = await api.delete(`/api/users/me/favorites/${pet._id}`);
+        setFavorites(Array.isArray(data) ? data : []);
+      } else {
+        if (pet.adopted) return false;
+        const { data } = await api.post(`/api/users/me/favorites/${pet._id}`);
+        setFavorites(Array.isArray(data) ? data : []);
+      }
+      return true;
+    } catch (e) {
+      setError(e?.response?.data?.msg || "Failed to update favorites");
+      return false;
+    }
   };
 
-  // αφαίρεση ανεξάρτητα από adopted (χρησιμοποιείται στο /favorites)
-  const removeFavorite = (id) => {
-    setFavorites((prev) => prev.filter((p) => p._id !== id));
+  const removeFavorite = async (id) => {
+    if (!hasToken()) return false;
+    try {
+      const { data } = await api.delete(`/api/users/me/favorites/${id}`);
+      setFavorites(Array.isArray(data) ? data : []);
+      return true;
+    } catch (e) {
+      setError(e?.response?.data?.msg || "Failed to remove favorite");
+      return false;
+    }
   };
 
-  // helper αν θες να ενημερώνεις snapshot (π.χ. adopted:true μετά από φόρμα)
   const updateFavorite = (id, patch) => {
     setFavorites((prev) => prev.map((p) => (p._id === id ? { ...p, ...patch } : p)));
   };
 
   const value = useMemo(
-    () => ({ favorites, isFavorite, toggleFavorite, removeFavorite, updateFavorite }),
-    [favorites]
+    () => ({
+      favorites,
+      loading,
+      error,
+      isFavorite,
+      toggleFavorite,
+      removeFavorite,
+      updateFavorite,
+      loadFavorites,
+    }),
+    [favorites, loading, error]
   );
 
   return <FavoritesContext.Provider value={value}>{children}</FavoritesContext.Provider>;
