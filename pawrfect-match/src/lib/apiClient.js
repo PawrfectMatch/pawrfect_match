@@ -1,34 +1,28 @@
 // src/lib/apiClient.js
 import axios from "axios";
+import { getAccessToken, setAccessToken, clearAccessToken } from "./auth";
 
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-// Πάντα παίρνουμε το πιο φρέσκο token
-const getToken = () => localStorage.getItem("accessToken");
-
 const api = axios.create({
   baseURL,
-  withCredentials: false, // συνήθη calls χωρίς cookies
+  withCredentials: true, // για refresh-cookie όταν χρειαστεί
 });
 
-// Authorization header σε κάθε request (αν υπάρχει token)
+// Request: βάζουμε Authorization αν υπάρχει token
 api.interceptors.request.use((config) => {
-  const token = getToken();
+  const token = getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// ----- Refresh flow (401/403) -----
 let isRefreshing = false;
-let pendingQueue = [];
+let pending = [];
 
-const processQueue = (error, token = null) => {
-  pendingQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error);
-    else resolve(token);
-  });
-  pendingQueue = [];
-};
+function onRefreshed(newToken) {
+  pending.forEach((cb) => cb(newToken));
+  pending = [];
+}
 
 api.interceptors.response.use(
   (res) => res,
@@ -36,47 +30,50 @@ api.interceptors.response.use(
     const original = error.config || {};
     const status = error?.response?.status;
 
-    if ((status === 401 || status === 403) && !original._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          pendingQueue.push({
-            resolve: (token) => {
-              original.headers.Authorization = `Bearer ${token}`;
-              resolve(api(original));
-            },
-            reject,
-          });
-        });
-      }
-
-      original._retry = true;
-      isRefreshing = true;
-
-      try {
-        // Κλήση refresh ΜΕ cookies
-        const refresh = await axios.post(
-          `${baseURL}/api/auth/refresh-token`,
-          {},
-          { withCredentials: true }
-        );
-        const newToken = refresh?.data?.accessToken;
-        if (newToken) {
-          localStorage.setItem("accessToken", newToken);
-          api.defaults.headers.Authorization = `Bearer ${newToken}`;
-          original.headers.Authorization = `Bearer ${newToken}`;
-          processQueue(null, newToken);
-          return api(original);
-        }
-        processQueue(new Error("No access token received from refresh"));
-      } catch (err) {
-        processQueue(err);
-        localStorage.removeItem("accessToken");
-      } finally {
-        isRefreshing = false;
-      }
+    // Αν δεν είναι 401 ή έχουμε ήδη προσπαθήσει refresh για αυτό το request, απλά πέτα το error
+    if (status !== 401 || original._retry) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    // Μαρκάρουμε ότι θα ξαναδοκιμάσουμε αυτό το request
+    original._retry = true;
+
+    // Συγχρονισμός πολλαπλών 401
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        pending.push((newToken) => {
+          if (!newToken) return reject(error);
+          original.headers = original.headers || {};
+          original.headers.Authorization = `Bearer ${newToken}`;
+          resolve(api(original));
+        });
+      });
+    }
+
+    isRefreshing = true;
+    try {
+      const { data } = await axios.post(
+        `${baseURL}/api/auth/refresh-token`,
+        {},
+        { withCredentials: true }
+      );
+      const newToken = data?.accessToken;
+      if (!newToken) throw new Error("No access token returned");
+
+      setAccessToken(newToken);
+      onRefreshed(newToken);
+
+      // Επανεκτέλεση του original request με νέο token
+      original.headers = original.headers || {};
+      original.headers.Authorization = `Bearer ${newToken}`;
+      return api(original);
+    } catch (e) {
+      clearAccessToken();
+      onRefreshed(null);
+      return Promise.reject(error);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 
