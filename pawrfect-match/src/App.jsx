@@ -1,4 +1,4 @@
-// src/App.jsx
+// App.jsx
 import "./App.css";
 import "./index.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -13,6 +13,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<PetPage />} />
+        <Route path="/pets" element={<PetPage />} />
         <Route
           path="/favorites"
           element={
@@ -21,7 +22,14 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/adopt/:petId" element={<AdoptForm />} />
+        <Route
+          path="/adopt/:petId"
+          element={
+            <ProtectedRoute>
+              <AdoptForm />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
       </Routes>
     </Router>

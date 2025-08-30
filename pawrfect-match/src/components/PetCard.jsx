@@ -21,6 +21,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import PetDetails from "./PetDetails";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import { useNavigate } from "react-router-dom";
+import { ensureValidAccessToken } from "../lib/auth";
 
 const PetCard = ({ pet, showRemove = false }) => {
   const [open, setOpen] = useState(false);
@@ -40,6 +41,15 @@ const PetCard = ({ pet, showRemove = false }) => {
     : favoriteNow
     ? "Remove from favorites"
     : "Add to favorites";
+
+  async function requireAuthOrLogin() {
+    const ok = await ensureValidAccessToken();
+    if (!ok) {
+      navigate("/login", { replace: true });
+      return false;
+    }
+    return true;
+    }
 
   return (
     <Card
@@ -71,10 +81,8 @@ const PetCard = ({ pet, showRemove = false }) => {
                 <IconButton
                   aria-label={favoriteNow ? "unfavorite" : "favorite"}
                   onClick={async () => {
-                    const ok = await toggleFavorite(pet);
-                    if (ok === false && !localStorage.getItem("accessToken")) {
-                      navigate("/login", { replace: true });
-                    }
+                    if (!(await requireAuthOrLogin())) return;
+                    await toggleFavorite(pet);
                   }}
                   sx={{ color: "error.main" }}
                   disabled={isAdopted}
@@ -84,26 +92,30 @@ const PetCard = ({ pet, showRemove = false }) => {
               </span>
             </Tooltip>
 
-            {/* View Details */}
+            {/* View Details (guarded) */}
             <Tooltip title={open ? "Hide Details" : "View Details"}>
               <IconButton
                 color="primary"
-                onClick={() => setOpen((v) => !v)}
+                onClick={async () => {
+                  if (!(await requireAuthOrLogin())) return;
+                  setOpen((v) => !v);
+                }}
                 aria-expanded={open}
               >
                 <InfoIcon />
               </IconButton>
             </Tooltip>
 
-            {/* Adopt */}
+            {/* Adopt (guarded) */}
             <Tooltip title={isAdopted ? "Already adopted" : "Start adoption"}>
               <span>
                 <IconButton
                   color="secondary"
                   disabled={isAdopted}
-                  onClick={() =>
-                    navigate(`/adopt/${pet._id}`, { state: { pet } })
-                  }
+                  onClick={async () => {
+                    if (!(await requireAuthOrLogin())) return;
+                    navigate(`/adopt/${pet._id}`, { state: { pet } });
+                  }}
                 >
                   <LaunchIcon />
                 </IconButton>
@@ -113,7 +125,10 @@ const PetCard = ({ pet, showRemove = false }) => {
             {/* Remove μόνο στο /favorites */}
             {showRemove && (
               <Tooltip title="Remove from favorites">
-                <IconButton color="error" onClick={() => removeFavorite(pet._id)}>
+                <IconButton
+                  color="error"
+                  onClick={() => removeFavorite(pet._id)}
+                >
                   <DeleteOutlineIcon />
                 </IconButton>
               </Tooltip>
