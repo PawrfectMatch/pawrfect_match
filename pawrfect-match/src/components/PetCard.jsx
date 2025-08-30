@@ -1,17 +1,9 @@
 // src/components/PetCard.jsx
 import React, { useState } from "react";
 import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardMedia,
-  Typography,
-  Chip,
-  Stack,
-  Collapse,
-  Box,
-  IconButton,
-  Tooltip,
+  Card, CardHeader, CardContent, CardMedia,
+  Typography, Chip, Stack, Collapse, Box,
+  IconButton, Tooltip,
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
@@ -35,12 +27,8 @@ const PetCard = ({ pet, showRemove = false }) => {
     "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop";
 
   const heartTooltip = isAdopted
-    ? favoriteNow
-      ? "Favorited (adopted)"
-      : "Can't favorite adopted pets"
-    : favoriteNow
-    ? "Remove from favorites"
-    : "Add to favorites";
+    ? favoriteNow ? "Favorited (adopted)" : "Can't favorite adopted pets"
+    : favoriteNow ? "Remove from favorites" : "Add to favorites";
 
   async function requireAuthOrLogin() {
     const ok = await ensureValidAccessToken();
@@ -49,33 +37,15 @@ const PetCard = ({ pet, showRemove = false }) => {
       return false;
     }
     return true;
-    }
+  }
 
   return (
-    <Card
-      sx={{
-        width: 380,
-        boxSizing: "border-box",
-        borderRadius: 3,
-        boxShadow: 2,
-        bgcolor: "background.paper",
-        color: "primary.dark",
-      }}
-    >
+    <Card sx={{ width: 380, boxSizing: "border-box", borderRadius: 3, boxShadow: 2, bgcolor: "background.paper", color: "primary.dark" }}>
       <CardHeader
-        title={
-          <Typography variant="h6" noWrap sx={{ color: "primary.dark" }}>
-            {pet.name}
-          </Typography>
-        }
-        subheader={
-          <Typography variant="body2" noWrap sx={{ color: "info.dark" }}>
-            {pet.species} {pet.breed ? `• ${pet.breed}` : ""}
-          </Typography>
-        }
+        title={<Typography variant="h6" noWrap sx={{ color: "primary.dark" }}>{pet.name}</Typography>}
+        subheader={<Typography variant="body2" noWrap sx={{ color: "info.dark" }}>{pet.species} {pet.breed ? `• ${pet.breed}` : ""}</Typography>}
         action={
           <Stack direction="row" spacing={0.5}>
-            {/* Favorite */}
             <Tooltip title={heartTooltip}>
               <span>
                 <IconButton
@@ -92,7 +62,6 @@ const PetCard = ({ pet, showRemove = false }) => {
               </span>
             </Tooltip>
 
-            {/* View Details (guarded) */}
             <Tooltip title={open ? "Hide Details" : "View Details"}>
               <IconButton
                 color="primary"
@@ -106,7 +75,6 @@ const PetCard = ({ pet, showRemove = false }) => {
               </IconButton>
             </Tooltip>
 
-            {/* Adopt (guarded) */}
             <Tooltip title={isAdopted ? "Already adopted" : "Start adoption"}>
               <span>
                 <IconButton
@@ -122,13 +90,9 @@ const PetCard = ({ pet, showRemove = false }) => {
               </span>
             </Tooltip>
 
-            {/* Remove μόνο στο /favorites */}
             {showRemove && (
               <Tooltip title="Remove from favorites">
-                <IconButton
-                  color="error"
-                  onClick={() => removeFavorite(pet._id)}
-                >
+                <IconButton color="error" onClick={() => removeFavorite(pet._id)}>
                   <DeleteOutlineIcon />
                 </IconButton>
               </Tooltip>
@@ -137,35 +101,13 @@ const PetCard = ({ pet, showRemove = false }) => {
         }
       />
 
-      <CardMedia
-        component="img"
-        sx={{ height: 160, objectFit: "cover" }}
-        image={pet.image_url || fallback}
-        alt={pet.name}
-        loading="lazy"
-        onError={(e) => (e.currentTarget.src = fallback)}
-      />
+      <CardMedia component="img" sx={{ height: 160, objectFit: "cover" }} image={pet.image_url || fallback} alt={pet.name} loading="lazy" onError={(e) => (e.currentTarget.src = fallback)} />
 
       <CardContent>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <Chip
-            label={`Age: ${pet.age}`}
-            size="small"
-            variant="outlined"
-            sx={{ color: "primary.dark", borderColor: "primary.dark" }}
-          />
-          <Chip
-            label={pet.gender}
-            size="small"
-            variant="outlined"
-            sx={{ color: "primary.dark", borderColor: "primary.dark" }}
-          />
-          <Chip
-            label={isAdopted ? "Adopted" : "Available"}
-            size="small"
-            color={isAdopted ? "warning" : "success"}
-            variant={isAdopted ? "outlined" : "filled"}
-          />
+          <Chip label={`Age: ${pet.age}`} size="small" variant="outlined" sx={{ color: "primary.dark", borderColor: "primary.dark" }} />
+          <Chip label={pet.gender} size="small" variant="outlined" sx={{ color: "primary.dark", borderColor: "primary.dark" }} />
+          <Chip label={isAdopted ? "Adopted" : "Available"} size="small" color={isAdopted ? "warning" : "success"} variant={isAdopted ? "outlined" : "filled"} />
         </Stack>
       </CardContent>
 

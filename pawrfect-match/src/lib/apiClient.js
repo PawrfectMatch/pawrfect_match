@@ -6,10 +6,9 @@ const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const api = axios.create({
   baseURL,
-  withCredentials: true, // για refresh-cookie όταν χρειαστεί
+  withCredentials: true,
 });
 
-// Request: βάζουμε Authorization αν υπάρχει token
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -30,15 +29,11 @@ api.interceptors.response.use(
     const original = error.config || {};
     const status = error?.response?.status;
 
-    // Αν δεν είναι 401 ή έχουμε ήδη προσπαθήσει refresh για αυτό το request, απλά πέτα το error
     if (status !== 401 || original._retry) {
       return Promise.reject(error);
     }
-
-    // Μαρκάρουμε ότι θα ξαναδοκιμάσουμε αυτό το request
     original._retry = true;
 
-    // Συγχρονισμός πολλαπλών 401
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         pending.push((newToken) => {
@@ -58,12 +53,10 @@ api.interceptors.response.use(
         { withCredentials: true }
       );
       const newToken = data?.accessToken;
-      if (!newToken) throw new Error("No access token returned");
-
+      if (!newToken) throw new Error("No access token");
       setAccessToken(newToken);
       onRefreshed(newToken);
 
-      // Επανεκτέλεση του original request με νέο token
       original.headers = original.headers || {};
       original.headers.Authorization = `Bearer ${newToken}`;
       return api(original);

@@ -18,8 +18,7 @@ export default function ProtectedRoute({ children }) {
     };
   }, []);
 
-  // Μικρό skeleton/κενό όσο ελέγχουμε
-  if (allowed === null) return null;
+  if (allowed === null) return null; // μικρό skeleton/blank όσο ελέγχουμε
 
   if (!allowed) {
     return (

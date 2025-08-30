@@ -20,23 +20,17 @@ export function isTokenExpired(token) {
     const [, payloadB64] = token.split(".");
     if (!payloadB64) return true;
     const payload = JSON.parse(atob(payloadB64));
-    // exp είναι σε seconds
     const expMs = (payload.exp || 0) * 1000;
-    // δώσε και μικρό περιθώριο 3s
-    return Date.now() >= expMs - 3000;
+    return Date.now() >= expMs - 3000; // 3s margin
   } catch {
     return true;
   }
 }
 
-/*
- * Εξασφαλίζει ότι έχουμε έγκυρο access token.
- */
 export async function ensureValidAccessToken() {
   const token = getAccessToken();
   if (token && !isTokenExpired(token)) return true;
 
-  // προσπάθησε refresh με cookie
   try {
     const { data } = await axios.post(
       `${API_BASE}/api/auth/refresh-token`,

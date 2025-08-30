@@ -45,7 +45,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   const { username, email, password } = req.body;
 
-  var user = await User.findOne({ $or: [{ username }, { email }] });
+  const user = await User.findOne({ $or: [{ username }, { email }] });
   if (!user) return res.status(400).json({ msg: "User not found" });
 
   const isMatch = await comparePassword(password, user.password);
@@ -57,7 +57,7 @@ const loginUser = async (req, res) => {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true, // HTTPSd
+    secure: true, // σε prod: process.env.NODE_ENV === "production"
     sameSite: "Strict",
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
@@ -75,9 +75,13 @@ const refreshUserToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const accessToken = generateToken({ username: verifiedUser.username });
+    
+    const accessToken = generateToken({
+      _id: verifiedUser.id,               //<<<---- pros8esa mono to _id: verifiedUser.id, olo to upoloipo code einai idio!
+      username: verifiedUser.username,
+    });
 
-    res.json({ accessToken: accessToken });
+    res.json({ accessToken });
   } catch (err) {
     if (err.name === "TokenExpiredError")
       return res.status(401).json({ msg: "Unauthorized. Please login again." });
