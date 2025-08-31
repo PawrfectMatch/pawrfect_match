@@ -4,6 +4,7 @@ import axios from "axios";
 import { getAccessToken, clearAccessToken } from "../lib/auth";
 import { theme } from "../theme/createTheme";
 import fetchCurrentUser from "../utils/fetchCurrentUser";
+import Notification from "../components/Notification.jsx";
 import { AvatarModal } from "../components/AvatarModal.jsx";
 import {
   ThemeProvider,
@@ -26,6 +27,10 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [open, setOpen] = useState(false);
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState("error");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [errors, setErrors] = useState([]);
 
   const navigate = useNavigate();
 
@@ -71,32 +76,49 @@ export default function Profile() {
           },
         }
       );
+      setAlertSeverity("success");
+      setAlertMessage("Your changes have been saved successfully");
+      setOpenAlert(true); // show Snackbar
 
       setTimeout(() => {
-        navigate("/")
+        navigate("/");
       }, 1000);
     } catch (err) {
-      console.log(err);
+      const errorMessage =
+        err.response?.data?.msg || err.message || "Login failed";
+
+      // Keep validation errors as object, but store server error separately
+      setErrors((prev) => ({ ...prev, server: errorMessage }));
+      setAlertSeverity("error");
+      setAlertMessage(errorMessage);
+      setOpenAlert(true); // show Snackbar
     }
   };
 
   const handleUserLogout = async () => {
     clearAccessToken();
     await axios.post(`${API_BASE}/api/auth/logout`); //clears cookie
-    navigate("/login");
+        setAlertSeverity("success");
+      setAlertMessage("Log out successful");
+      setOpenAlert(true); // show Snackbar
+    setTimeout (() => navigate("/login"), 1000)  ;
   };
 
   const handleAccountDeletion = async () => {
     const token = getAccessToken();
     console.log("Access token:", token);
-   
+
     await axios.delete(`${API_BASE}/api/users/${user._id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
-     clearAccessToken();
-    navigate("/register");
+    clearAccessToken();
+            setAlertSeverity("success");
+      setAlertMessage("Your account has been deleted successfully");
+      setOpenAlert(true); // show Snackbar
+    setTimeout (() =>    navigate("/register"), 1000)  ;
+ ;
   };
 
   if (isLoading) return <p>Loading...</p>;
@@ -327,6 +349,12 @@ export default function Profile() {
                 Log out
               </Button>
             </Box>
+                 <Notification
+        handleClose={() => {setOpenAlert(false)}}
+        openAlert={openAlert}
+        alertSeverity={alertSeverity}
+        alertMessage={alertMessage}
+      />
             <Typography
               color="text.disabled"
               sx={{ textAlign: "center", mt: 8 }}
