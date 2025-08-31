@@ -1,3 +1,4 @@
+// src/pages/PetPage.jsx
 import React, { useState, useMemo } from "react";
 import usePets from "../hooks/usePets";
 import useSearchPets from "../hooks/useSearchPets";
@@ -13,16 +14,22 @@ const PetPage = () => {
   // search query (by name/id)
   const [query, setQuery] = useState("");
 
-  // αποτελέσματα μετά τα dropdown φίλτρα (έρχονται από το PetFilter)
-  const [filteredByDropdown, setFilteredByDropdown] = useState([]);
+  
+  
+  const [filteredByDropdown, setFilteredByDropdown] = useState(null);
 
   const navigate = useNavigate();
 
   // ✅ Εφαρμόζουμε ΠΑΝΩ εκεί και το search
+=======
+  // if no filters -> allPets
+  // if there is a combo of filters -> show content even there is no card
+
   const basePets = useMemo(
-    () => (filteredByDropdown.length ? filteredByDropdown : allPets),
+    () => (filteredByDropdown === null ? allPets : filteredByDropdown),
     [filteredByDropdown, allPets]
   );
+
   const searchedPets = useSearchPets(basePets, query);
 
   if (loading) return <p>Loading pets...</p>;
@@ -32,7 +39,7 @@ const PetPage = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ p: 2, maxWidth: 1000, mx: "auto" }}>
-        {/* Header με κουμπί πάνω δεξιά */}
+        {/* Header with button*/}
         <Box
           sx={{
             display: "flex",
@@ -65,6 +72,9 @@ const PetPage = () => {
               onClick={() => navigate("/profile")}
             />
           </Box>
+            Favorites
+          </Button>
+
         </Box>
 
         {/* Search */}
@@ -85,7 +95,7 @@ const PetPage = () => {
         {/* Dropdown filters (default: Available) */}
         <PetFilter allPets={allPets} onFilterChange={setFilteredByDropdown} />
 
-        {/* Grid με αποτέλεσμα: filters -> search */}
+        
         <PetGrid pets={searchedPets} maxWidth={1000} />
       </Box>
     </ThemeProvider>

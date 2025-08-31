@@ -22,7 +22,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ Static uploads (βάλε τα αρχεία στο backend/uploads/…)
+// ✅ Static uploads (put files in backend/uploads/…)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // API routes
@@ -30,7 +30,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/pets", petRoutes);
 
-// Προαιρετικό root για έλεγχο server
+
 app.get("/", (_req, res) => res.send("Hello World"));
 
 app.listen(process.env.PORT, () => {

@@ -17,7 +17,7 @@ const PetGrid = ({ pets, maxWidth = 1000, showRemove = false }) => {
       <Grid
         container
         spacing={2}
-        justifyContent="center"   // κεντραρισμένο κάτω από το filter bar
+        justifyContent="center"   
         alignItems="flex-start"
       >
         {pets.map((pet) => (

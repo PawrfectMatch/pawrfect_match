@@ -31,7 +31,7 @@ const selectSx = {
   ...fieldSx,
 };
 
-// helper για ToggleButtonGroup -> onChange του parent
+// helper for ToggleButtonGroup -> parent onChange
 const makeToggleHandler = (name, onChange) => (_e, val) => {
   if (val !== null) onChange({ target: { name, value: val } });
 };

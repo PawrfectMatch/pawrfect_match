@@ -13,17 +13,17 @@ import {
 const PetFilter = ({ allPets = [], onFilterChange }) => {
   const [selectedSpecies, setSelectedSpecies] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
-  // ✅ Default: δείχνουμε μόνο "Available"
+  // ✅ Default: display only  "Available"
   const [selectedAdopted, setSelectedAdopted] = useState("Available");
   const [selectedAgeRange, setSelectedAgeRange] = useState("");
 
-  // Μοναδικά species για dropdown (με memo για performance)
+  // unique species dropdown (with memo for performance)
   const speciesOptions = useMemo(() => {
     const set = new Set(allPets.map((p) => p.species).filter(Boolean));
     return Array.from(set).sort();
   }, [allPets]);
 
-  // Εφάρμοσε φίλτρα κάθε φορά που αλλάζουν δεδομένα/επιλογές
+  // set filters each time there is a change
   useEffect(() => {
     let filtered = allPets;
 
@@ -66,13 +66,13 @@ const PetFilter = ({ allPets = [], onFilterChange }) => {
     onFilterChange,
   ]);
 
-  // Reset όλων των φίλτρων (μένουμε στο default "Available")
+  // Reset filters to "Available"
   const handleReset = () => {
     setSelectedSpecies("");
     setSelectedGender("");
     setSelectedAdopted("Available"); // ✅ default
     setSelectedAgeRange("");
-    // θα τρέξει το useEffect και θα ενημερώσει τα αποτελέσματα
+    
   };
 
   return (
