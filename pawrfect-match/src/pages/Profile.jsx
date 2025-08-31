@@ -4,6 +4,7 @@ import axios from "axios";
 import { getAccessToken, clearAccessToken } from "../lib/auth";
 import { theme } from "../theme/createTheme";
 import fetchCurrentUser from "../utils/fetchCurrentUser";
+import { AvatarModal } from "../components/AvatarModal.jsx";
 import {
   ThemeProvider,
   CssBaseline,
@@ -12,11 +13,11 @@ import {
   Button,
   Card,
   CardContent,
-  CardHeader,
   Divider,
-  Grid,
   TextField,
   Typography,
+  Container,
+  FormLabel,
 } from "@mui/material";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -24,6 +25,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 export default function Profile() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [open, setOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -58,110 +60,193 @@ export default function Profile() {
   if (isLoading) return <p>Loading...</p>;
   if (!user) navigate("/login");
 
-  const avatarOptions = [
-    "https://res.cloudinary.com/caggel/image/upload/v1756658601/avatar7_y2wltl.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658598/avatar5_ir4kz9.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658599/avatar6_mok9ke.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658598/avatar3_mwmsg6.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658598/avatar4_qsxdos.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658598/avatar1_e2pbus.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658598/avatar2_ewjt0j.png",
-    "https://res.cloudinary.com/caggel/image/upload/v1756658597/avatar8_qk4odn.png",
-  ];
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const onSelectAvatar = (image) => {
+    setUser((prev) => ({ ...prev, avatar: image }));
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          mt: 6,
-          bckColor: "background.default",
-        }}
-      >
-        <Card
+      {user && (
+        // Card
+        <Box
           sx={{
-            maxWidth: { xs: "80%", md: "60%" },
-            width: "100%",
-            p: 3,
-            borderRadius: 4,
-            boxShadow: 3,
+            display: "flex",
+            justifyContent: "center",
+            mt: 6,
+            bckColor: "background.default",
           }}
         >
-          <Box
+          <Card
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              mb: 2,
+              maxWidth: { xs: "80%", md: "60%" },
+              width: "100%",
+              p: 3,
+              borderRadius: 4,
+              boxShadow: 3,
             }}
           >
-            <Avatar
-              alt={user.username}
-              src={user.avatar || ""}
-              sx={{ width: 100, height: 100, mb: 1 }}
-            />
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              sx={{ color: "primary.dark" }}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 2,
+              }}
             >
-              {user.firstName} {user.lastName}
-            </Typography>
-            <Typography variant="subtitle1" color="warning.contrastText">
-              @{user.username}
-            </Typography>
-          </Box>
+              {/* Avatar and Modal */}
+              <Avatar
+                alt={user.username}
+                src={user.avatar || ""}
+                sx={{ width: 100, height: 100, mb: 1, cursor: "pointer" }}
+                onClick={handleOpen}
+              />
+              <AvatarModal
+                handleClose={handleClose}
+                open={open}
+                onSelectAvatar={onSelectAvatar}
+              />
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                sx={{ color: "primary.dark" }}
+              >
+                {user.firstName} {user.lastName}
+              </Typography>
+              <Typography variant="subtitle1" color="warning.contrastText">
+                @{user.username}
+              </Typography>
+            </Box>
 
-          <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2 }} />
 
-          <CardContent sx={{ color: "warning.contrastText" }}>
-            <Typography variant="body1">
-              <strong>First name:</strong> {user.firstName}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Last name:</strong> {user.lastName}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Email:</strong> {user.email}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Username:</strong> {user.username}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Password:</strong> {user.password}
-            </Typography>
-          </CardContent>
-
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              justifyContent: "center",
-              gap: { xs: 3, md: 5 },
-              my: 3,
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ alignSelf: "center", width: 150 }}
-              onClick={handleUserLogout}
+            {/* User information */}
+            <CardContent
+              sx={{ display: "flex", justifyContent: "space-between" }}
             >
-              Update User
-            </Button>
-            <Button
-              variant="contained"
-              color="info"
-              sx={{ alignSelf: "center", width: 150 }}
-              onClick={handleUserLogout}
+              {/* Right side - user info */}
+              <Container>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <FormLabel
+                    sx={{ color: "warning.contrastText", fontWeight: 600 }}
+                  >
+                    First Name:{" "}
+                  </FormLabel>
+                  <TextField
+                   sx={{ input: { color: "primary.dark" }, mb: 2 }}
+                    variant="standard"
+                    value={user.firstName} // controlled input
+                    onChange={(e) =>
+                      setUser((prev) => ({
+                        ...prev,
+                        firstName: e.target.value,
+                      }))
+                    }
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <FormLabel
+                    sx={{ color: "warning.contrastText", fontWeight: 600 }}
+                  >
+                    Last Name:{" "}
+                  </FormLabel>
+                  <TextField
+                    variant="standard"
+                    value={user.lastName}
+                    onChange={(e) =>
+                      setUser((prev) => ({ ...prev, lastName: e.target.value }))
+                    }
+                    sx={{ input: { color: "primary.dark" }, mb: 2 }}
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <FormLabel
+                    sx={{ color: "warning.contrastText", fontWeight: 600 }}
+                  >
+                    Email:{" "}
+                  </FormLabel>
+                  <TextField
+                    type="email"
+                    variant="standard"
+                    value={user.email}
+                    onChange={(e) =>
+                      setUser((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    sx={{ input: { color: "primary.dark" }, mb: 2 }}
+                  />
+                </Box>
+              </Container>
+
+              {/* Left side - Login info */}
+              <Container>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <FormLabel
+                    sx={{ color: "warning.contrastText", fontWeight: 600 }}
+                  >
+                    Username:{" "}
+                  </FormLabel>
+                  <TextField
+                    variant="standard"
+                    value={user.username}
+                    onChange={(e) =>
+                      setUser((prev) => ({ ...prev, username: e.target.value }))
+                    }
+                    sx={{ input: { color: "primary.dark" }, mb: 2 }}
+                  />
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <FormLabel
+                    sx={{ color: "warning.contrastText", fontWeight: 600 }}
+                  >
+                    Password:{" "}
+                  </FormLabel>
+                  <TextField
+                    type="password"
+                    variant="standard"
+                    value="********"
+                    onChange={(e) =>
+                      setUser((prev) => ({ ...prev, password: e.target.value }))
+                    }
+                    sx={{ input: { color: "primary.dark" }, mb: 2 }}
+                  />
+                </Box>
+              </Container>
+            </CardContent>
+
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                justifyContent: "center",
+                gap: { xs: 3, md: 5 },
+                my: 3,
+              }}
             >
-              Log out
-            </Button>
-          </Box>
-        </Card>
-      </Box>
+              <Button
+                variant="contained"
+                sx={{ alignSelf: "center", width: 150 }}
+                onClick={handleUserLogout}
+              >
+                SAVE CHANGES
+              </Button>
+              <Button
+                variant="contained"
+                color="info"
+                sx={{ alignSelf: "center", width: 150 }}
+                onClick={handleUserLogout}
+              >
+                Log out
+              </Button>
+            </Box>
+          </Card>
+        </Box>
+      )}
     </ThemeProvider>
   );
 }
