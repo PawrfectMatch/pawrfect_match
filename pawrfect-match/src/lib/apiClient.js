@@ -1,4 +1,4 @@
-// src/lib/apiClient.js
+// main
 import axios from "axios";
 import { getAccessToken, setAccessToken, clearAccessToken } from "./auth";
 

@@ -1,4 +1,4 @@
-// src/components/ProtectedRoute.jsx
+// main
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { ensureValidAccessToken } from "../lib/auth";
@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children }) {
     };
   }, []);
 
-  if (allowed === null) return null; // μικρό skeleton/blank όσο ελέγχουμε
+  if (allowed === null) return null; 
 
   if (!allowed) {
     return (

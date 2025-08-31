@@ -4,7 +4,7 @@ const { validationResult } = require("express-validator");
 const validateObjectId = require("../validations/objectIdValidation");
 
 // ----------------------
-// Υπάρχοντα endpoints
+// Existing endpoints
 // ----------------------
 const getUsers = async (req, res) => {
   try {
@@ -114,14 +114,14 @@ const addFavorite = async (req, res) => {
         .status(400)
         .json({ msg: "Cannot favorite an adopted pet" });
 
-    // $addToSet για αποφυγή διπλοεγγραφών
+    // $addToSet to avoid duplicates
     await User.findByIdAndUpdate(
       req.user.id,
       { $addToSet: { favorites: petId } },
       { new: true }
     );
 
-    // Επιστρέφουμε την ενημερωμένη λίστα (populated)
+    // returns updated list (populated)
     const me = await User.findById(req.user.id).populate({
       path: "favorites",
       select: FAVORITE_PET_FIELDS,

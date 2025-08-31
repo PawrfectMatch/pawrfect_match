@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 
 export default function Step3Review({ form, pet, onChange }) {
-  // Labels & σειρά εμφάνισης
+  // Labels & order of appearance
   const FIELDS = [
     "fullName",
     "email",
@@ -61,13 +61,13 @@ export default function Step3Review({ form, pet, onChange }) {
     whyThisPet: "Why this pet?",
   };
 
-  // Κανόνες προβολής (όταν έχουν νόημα)
+  
   const shouldShow = (key) => {
     if (key === "landlordPermission" && form.residentialStatus !== "Renting")
       return false;
     if (key === "childrenAges" && !Number(form.children) > 0) return false;
     if (key === "petTypes" && form.hasPets !== "Yes") return false;
-    // Απόκρυψη των consent πεδίων — εμφανίζονται ως checkboxes κάτω
+    
     if (["confirmInfo", "agreePolicies", "consentContact"].includes(key))
       return false;
     return true;
