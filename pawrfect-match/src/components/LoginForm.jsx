@@ -48,7 +48,7 @@ export default function LoginForm() {
   };
 
   // Form submit
-  const handleSubmit = async (e) => {
+  const handleRegistration = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -91,7 +91,7 @@ export default function LoginForm() {
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit}
+      onSubmit={handleRegistration}
       noValidate
       elevation={10}
       sx={{
@@ -162,7 +162,7 @@ export default function LoginForm() {
         alertMessage={alertMessage}
       />
       <Typography color="text.disabled" sx={{ textAlign: "center", mt: 8 }}>
-        Don't have an account? <Link sx={{ ml: 1 }}>Sign Up</Link>
+        Don't have an account? <Link sx={{ ml: 1, cursor:"pointer" }} onClick={() => navigate("/register")}>Sign Up</Link>
       </Typography>
     </Box>
   );
