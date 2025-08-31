@@ -1,11 +1,11 @@
 // main
 import React, { useEffect } from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Avatar } from "@mui/material";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { theme } from "../theme/createTheme";
 import { useFavorites } from "../context/FavoritesContext.jsx";
 import PetGrid from "../components/PetGrid";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 export default function FavoritePets() {
   const { favorites, loadFavorites } = useFavorites();
@@ -14,6 +14,8 @@ export default function FavoritePets() {
   useEffect(() => {
     loadFavorites();
   }, [loadFavorites]);
+
+  const navigate=useNavigate()
 
   return (
     <ThemeProvider theme={theme}>
@@ -31,6 +33,8 @@ export default function FavoritePets() {
           <Typography variant="h4" sx={{ m: 0 }}>
             ❤️ Your Favorite Pets
           </Typography>
+          <Box sx={{display: "flex", gap: 2}}>
+
           <Button
             component={RouterLink}
             to="/pets"
@@ -39,6 +43,13 @@ export default function FavoritePets() {
           >
             BACK TO SEARCH
           </Button>
+            <Avatar
+              sx={{ cursor: "pointer" }}
+              alt="User profile image"
+              aria-label="Go to user profile"
+              onClick={() => navigate("/profile")}
+            />
+          </Box>
         </Box>
 
         {!favorites || favorites.length === 0 ? (

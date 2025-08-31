@@ -28,9 +28,19 @@ export const FavoritesProvider = ({ children }) => {
     }
   }, []);
 
+  // useEffect(() => {
+  //   loadFavorites();
+  // }, [loadFavorites]);
+
   useEffect(() => {
-    loadFavorites();
-  }, [loadFavorites]);
+  const handleStorage = (e) => {
+    if (e.key === "accessToken" && e.newValue) {
+      loadFavorites();
+    }
+  };
+  window.addEventListener("storage", handleStorage);
+  return () => window.removeEventListener("storage", handleStorage);
+}, [loadFavorites]);
 
   const isFavorite = useCallback((id) => favorites.some((p) => p._id === id), [favorites]);
 

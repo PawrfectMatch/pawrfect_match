@@ -6,7 +6,9 @@ import PetPage from "./pages/PetPage";
 import FavoritePets from "./pages/FavoritePets.jsx";
 import AdoptForm from "./pages/AdoptForm.jsx";
 import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Profile from "./pages/Profile.jsx";
 
 function App() {
   return (
@@ -30,7 +32,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+            <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
   );

@@ -34,7 +34,19 @@ const registerUser = async (req, res) => {
 
     await newUser.save();
 
-    await res.status(201).json(newUser);
+    const accessToken = generateToken(newUser);
+    const refreshToken = generateRefreshToken(newUser);
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true, // σε prod: process.env.NODE_ENV === "production"
+      sameSite: "Strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    
+
+    await res.status(201).json({user: newUser, accessToken: accessToken, refreshToken: refreshToken });
   } catch (err) {
     res
       .status(err.status || 500)
@@ -75,9 +87,8 @@ const refreshUserToken = async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    
     const accessToken = generateToken({
-      _id: verifiedUser.id,               //<<<---- pros8esa mono to _id: verifiedUser.id, olo to upoloipo code einai idio!
+      _id: verifiedUser.id, //<<<---- pros8esa mono to _id: verifiedUser.id, olo to upoloipo code einai idio!
       username: verifiedUser.username,
     });
 
@@ -93,4 +104,34 @@ const refreshUserToken = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, refreshUserToken };
+const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+    });
+
+    res.json({ msg: "Logged out successfully" });
+  } catch (err) {
+    res.status(500).json({ msg: "Internal server error" });
+  }
+};
+
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ msg: "User not found" });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ msg: "Internal server error" });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  refreshUserToken,
+  logoutUser,
+  getMe,
+};

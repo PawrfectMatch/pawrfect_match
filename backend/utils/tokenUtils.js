@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const generateToken = (user) => {
-  const userId = user._id || user.id; // <<<------ pros8esa auto gia na diavazei kai ta duo
+  const userId = user._id || user.id; 
   return jwt.sign(
     { id: userId, username: user.username },
     process.env.ACCESS_TOKEN_SECRET,
@@ -11,9 +11,9 @@ const generateToken = (user) => {
 };
 
 const generateRefreshToken = (user) => {
-  const userId = user._id || user.id; // <<<------- kai to pros8esa ki edw! ola ta alla einai opws ta eixes.
+  const userId = user._id || user.id; 
   return jwt.sign(
-    { id: userId, username: user.username },
+    {  id: userId, username: user.username },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
   );

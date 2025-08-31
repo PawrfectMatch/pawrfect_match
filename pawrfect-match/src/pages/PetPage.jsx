@@ -4,9 +4,9 @@ import usePets from "../hooks/usePets";
 import useSearchPets from "../hooks/useSearchPets";
 import PetGrid from "../components/PetGrid";
 import PetFilter from "../components/PetFilter";
-import { ThemeProvider, CssBaseline, Box, Button } from "@mui/material";
+import { ThemeProvider, CssBaseline, Box, Button, Avatar } from "@mui/material";
 import { theme } from "../theme/createTheme";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const PetPage = () => {
   const { allPets, loading, error } = usePets();
@@ -18,8 +18,13 @@ const PetPage = () => {
   
   const [filteredByDropdown, setFilteredByDropdown] = useState(null);
 
+  const navigate = useNavigate();
+
+  // ✅ Εφαρμόζουμε ΠΑΝΩ εκεί και το search
+=======
   // if no filters -> allPets
   // if there is a combo of filters -> show content even there is no card
+
   const basePets = useMemo(
     () => (filteredByDropdown === null ? allPets : filteredByDropdown),
     [filteredByDropdown, allPets]
@@ -40,18 +45,36 @@ const PetPage = () => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            mb: 2,
+            mb: 4,
           }}
         >
           <h1 style={{ margin: 0 }}>🐾 Our Pets</h1>
-          <Button
-            component={RouterLink}
-            to="/favorites"
-            variant="contained"
-            color="secondary"
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              gap: 2
+            }}
           >
+            <Button
+              component={RouterLink}
+              to="/favorites"
+              variant="contained"
+              color="secondary"
+            >
+              Favorites
+            </Button>
+            <Avatar
+              sx={{ cursor: "pointer" }}
+              alt="User profile image"
+              aria-label="Go to user profile"
+              onClick={() => navigate("/profile")}
+            />
+          </Box>
             Favorites
           </Button>
+
         </Box>
 
         {/* Search */}

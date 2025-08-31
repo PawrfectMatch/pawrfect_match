@@ -60,7 +60,7 @@ api.interceptors.response.use(
       original.headers = original.headers || {};
       original.headers.Authorization = `Bearer ${newToken}`;
       return api(original);
-    } catch (e) {
+    } catch (error) {
       clearAccessToken();
       onRefreshed(null);
       return Promise.reject(error);

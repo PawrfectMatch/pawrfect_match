@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 
-const validateUser = [
+const validateUpdateUser = [
     body("firstName")
         .notEmpty().withMessage("Firstname is required")
         .isString().withMessage("Firstname must be a string")
@@ -19,15 +19,6 @@ const validateUser = [
         .notEmpty().withMessage("Username is required")
         .trim(),
 
-    body("password")
-        .notEmpty().withMessage("Password is required")
-        .isLength({ min: 6, max: 100 }).withMessage("Password must be 6-100 characters")
-        .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase letter")
-        .matches(/[a-z]/).withMessage("Password must contain at least one lowercase letter")
-        .matches(/[0-9]/).withMessage("Password must contain at least one number")
-        .matches(/[^a-zA-Z0-9]/).withMessage("Password must contain a special character (@$!%*?&#)")
-        .trim(),
-
     body("email")
         .notEmpty().withMessage("Email is required")
         .isEmail().withMessage("Must be a valid email"),
@@ -35,4 +26,16 @@ const validateUser = [
     body("avatar").optional().isURL().withMessage("Avatar must be a valid URL")
 ];
 
-module.exports = validateUser;
+const validateUser = [
+    ...validateUpdateUser,
+  body("password")
+        .notEmpty().withMessage("Password is required")
+        .isLength({ min: 6, max: 100 }).withMessage("Password must be 6-100 characters")
+        .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase letter")
+        .matches(/[a-z]/).withMessage("Password must contain at least one lowercase letter")
+        .matches(/[0-9]/).withMessage("Password must contain at least one number")
+        .matches(/[^a-zA-Z0-9]/).withMessage("Password must contain a special character (@$!%*?&#)")
+        .trim(),
+]
+
+module.exports = {validateUser, validateUpdateUser};
