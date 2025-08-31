@@ -21,7 +21,6 @@ const PetPage = () => {
   const navigate = useNavigate();
 
   // ✅ Εφαρμόζουμε ΠΑΝΩ εκεί και το search
-=======
   // if no filters -> allPets
   // if there is a combo of filters -> show content even there is no card
 
@@ -72,9 +71,6 @@ const PetPage = () => {
               onClick={() => navigate("/profile")}
             />
           </Box>
-            Favorites
-          </Button>
-
         </Box>
 
         {/* Search */}
