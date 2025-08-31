@@ -65,7 +65,7 @@ export default function RegisterForm() {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/auth/register",
-        { firstName: firstname, lastName:lastname, email, username, password, avatar:"https://www.freepik.com/free-vector/man-profile-account-picture_137411837.htm#fromView=keyword&page=1&position=33&uuid=8981dc7c-d9d6-4214-9a30-e6e44a8430c0&query=Avatar+Profile" },
+        { firstName: firstname, lastName:lastname, email, username, password, avatar:"https://res.cloudinary.com/caggel/image/upload/v1756658551/avatar_bvtdgu.png" },
         { withCredentials: true }
       );
 
