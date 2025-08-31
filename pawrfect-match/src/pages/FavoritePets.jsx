@@ -1,4 +1,4 @@
-// src/pages/FavoritePets.jsx
+// main
 import React, { useEffect } from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { ThemeProvider, CssBaseline } from "@mui/material";
@@ -10,7 +10,7 @@ import { Link as RouterLink } from "react-router-dom";
 export default function FavoritePets() {
   const { favorites, loadFavorites } = useFavorites();
 
-  // Φόρτωσε/συγχρόνισε με τον server όταν μπαίνουμε στη σελίδα
+  
   useEffect(() => {
     loadFavorites();
   }, [loadFavorites]);
