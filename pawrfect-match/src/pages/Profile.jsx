@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { getAccessToken, clearAccessToken } from "../lib/auth";
 import { theme } from "../theme/createTheme";
@@ -51,10 +51,52 @@ export default function Profile() {
     fetchUser();
   }, []);
 
+  const handleSaveUser = async () => {
+    const token = getAccessToken();
+
+    try {
+      await axios.patch(
+        `${API_BASE}/api/users/${user._id}`,
+        {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          username: user.username,
+          password: user.password,
+          avatar: user.avatar,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setTimeout(() => {
+        navigate("/")
+      }, 1000);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const handleUserLogout = async () => {
     clearAccessToken();
     await axios.post(`${API_BASE}/api/auth/logout`); //clears cookie
     navigate("/login");
+  };
+
+  const handleAccountDeletion = async () => {
+    const token = getAccessToken();
+    console.log("Access token:", token);
+   
+    await axios.delete(`${API_BASE}/api/users/${user._id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+     clearAccessToken();
+    navigate("/register");
   };
 
   if (isLoading) return <p>Loading...</p>;
@@ -65,6 +107,8 @@ export default function Profile() {
   const onSelectAvatar = (image) => {
     setUser((prev) => ({ ...prev, avatar: image }));
   };
+
+  console.log(user);
 
   return (
     <ThemeProvider theme={theme}>
@@ -82,8 +126,7 @@ export default function Profile() {
         >
           <Card
             sx={{
-              maxWidth: { xs: "80%", md: "60%" },
-              width: "100%",
+              width: { xs: "80%", md: "60%" },
               p: 3,
               borderRadius: 4,
               boxShadow: 3,
@@ -125,18 +168,29 @@ export default function Profile() {
 
             {/* User information */}
             <CardContent
-              sx={{ display: "flex", justifyContent: "space-between" }}
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                justifyContent: { xs: "center", md: "space-between" },
+              }}
             >
               {/* Right side - user info */}
               <Container>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: { xs: "center" },
+                    gap: 2,
+                  }}
+                >
                   <FormLabel
                     sx={{ color: "warning.contrastText", fontWeight: 600 }}
                   >
                     First Name:{" "}
                   </FormLabel>
                   <TextField
-                   sx={{ input: { color: "primary.dark" }, mb: 2 }}
+                    sx={{ input: { color: "primary.dark" }, mb: 2 }}
                     variant="standard"
                     value={user.firstName} // controlled input
                     onChange={(e) =>
@@ -148,7 +202,14 @@ export default function Profile() {
                   />
                 </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    justifyContent: { xs: "center" },
+                  }}
+                >
                   <FormLabel
                     sx={{ color: "warning.contrastText", fontWeight: 600 }}
                   >
@@ -164,7 +225,14 @@ export default function Profile() {
                   />
                 </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    justifyContent: { xs: "center" },
+                  }}
+                >
                   <FormLabel
                     sx={{ color: "warning.contrastText", fontWeight: 600 }}
                   >
@@ -184,7 +252,14 @@ export default function Profile() {
 
               {/* Left side - Login info */}
               <Container>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    justifyContent: { xs: "center" },
+                  }}
+                >
                   <FormLabel
                     sx={{ color: "warning.contrastText", fontWeight: 600 }}
                   >
@@ -200,7 +275,14 @@ export default function Profile() {
                   />
                 </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    justifyContent: { xs: "center" },
+                  }}
+                >
                   <FormLabel
                     sx={{ color: "warning.contrastText", fontWeight: 600 }}
                   >
@@ -209,7 +291,8 @@ export default function Profile() {
                   <TextField
                     type="password"
                     variant="standard"
-                    value="********"
+                    value={user.password}
+                    placeholder="********"
                     onChange={(e) =>
                       setUser((prev) => ({ ...prev, password: e.target.value }))
                     }
@@ -231,7 +314,7 @@ export default function Profile() {
               <Button
                 variant="contained"
                 sx={{ alignSelf: "center", width: 150 }}
-                onClick={handleUserLogout}
+                onClick={handleSaveUser}
               >
                 SAVE CHANGES
               </Button>
@@ -244,6 +327,18 @@ export default function Profile() {
                 Log out
               </Button>
             </Box>
+            <Typography
+              color="text.disabled"
+              sx={{ textAlign: "center", mt: 8 }}
+            >
+              Do you wish to delete my account?{" "}
+              <Link
+                sx={{ ml: 1, cursor: "pointer", color: "primary.dark" }}
+                onClick={handleAccountDeletion}
+              >
+                Yes, Delete my account
+              </Link>
+            </Typography>
           </Card>
         </Box>
       )}

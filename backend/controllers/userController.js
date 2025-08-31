@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const Pet = require("../models/petmodel");
 const { validationResult } = require("express-validator");
 const validateObjectId = require("../validations/objectIdValidation");
+const { hashPassword } = require("../utils/passwordUtils");
 
 // ----------------------
 // Υπάρχοντα endpoints
@@ -39,11 +40,18 @@ const updateUser = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.json(errors);
-
-    const patchedUser = req.body;
-
+    
     const validatedId = validateObjectId(req.params.id);
     if (!validatedId) return res.status(404).json({ msg: "Bad request" });
+
+    const patchedUser = { ...req.body };
+
+    // Only hash password if provided
+    if (patchedUser.password && patchedUser.password.trim() !== "") {
+      patchedUser.password = await hashPassword(patchedUser.password);
+    } else {
+      delete patchedUser.password; // prevent overwriting with empty
+    }
 
     const user = await User.findByIdAndUpdate(req.params.id, patchedUser, {
       new: true,
@@ -110,9 +118,7 @@ const addFavorite = async (req, res) => {
     if (!pet) return res.status(404).json({ msg: "Pet not found" });
 
     if (pet.adopted)
-      return res
-        .status(400)
-        .json({ msg: "Cannot favorite an adopted pet" });
+      return res.status(400).json({ msg: "Cannot favorite an adopted pet" });
 
     // $addToSet για αποφυγή διπλοεγγραφών
     await User.findByIdAndUpdate(

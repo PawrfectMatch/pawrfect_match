@@ -123,7 +123,7 @@ export default function RegisterForm() {
         }}
       >
         <Avatar
-          sx={{ width: 56, height: 56, textAlign: "center", mb: 2, p: 2 }}
+          sx={{ width: 56, height: 56, textAlign: "center", my: 2, p: 2 }}
         >
           <PermIdentityOutlinedIcon color="text.primary" fontSize="large" />
         </Avatar>

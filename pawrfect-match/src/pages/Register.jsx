@@ -1,4 +1,4 @@
-import image from "../assets/images/pawrfect-registration-4.png";
+import image from "../assets/images/registration.png";
 import AuthLayout from "../layouts/AuthLayout";
 import RegisterForm from "../components/RegisterForm";
 

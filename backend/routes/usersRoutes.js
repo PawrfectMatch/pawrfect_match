@@ -12,7 +12,7 @@ const {
 } = require("../controllers/userController");
 
 const authenticateToken = require("../middleware/authToken");
-const validateUser = require("../validations/userValidations");
+const {validateUpdateUser} = require("../validations/userValidations");
 
 // --------- Favorites (per logged-in user) ---------
 router.get("/me/favorites", authenticateToken, getMyFavorites);
@@ -22,7 +22,7 @@ router.delete("/me/favorites/:petId", authenticateToken, removeFavorite);
 // --------- Users ---------
 router.get("/", authenticateToken, getUsers);
 router.get("/:id", authenticateToken, getUser);
-router.put("/:id", authenticateToken, validateUser, updateUser);
+router.patch("/:id", authenticateToken, validateUpdateUser, updateUser);
 router.delete("/:id", authenticateToken, deleteUser);
 
 
